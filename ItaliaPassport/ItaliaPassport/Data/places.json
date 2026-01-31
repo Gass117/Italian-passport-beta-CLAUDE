@@ -1,0 +1,300 @@
+{
+  "regions": [
+    {
+      "id": "toscana",
+      "name": "Toscana",
+      "displayName": "Toscana",
+      "capitalCity": "Firenze",
+      "shapeAssetName": "toscana_shape",
+      "centerLatitude": 43.7711,
+      "centerLongitude": 11.2486,
+      "themeColorHex": "#D4A574"
+    },
+    {
+      "id": "lazio",
+      "name": "Lazio",
+      "displayName": "Lazio",
+      "capitalCity": "Roma",
+      "shapeAssetName": "lazio_shape",
+      "centerLatitude": 41.9028,
+      "centerLongitude": 12.4964,
+      "themeColorHex": "#C19A6B"
+    },
+    {
+      "id": "campania",
+      "name": "Campania",
+      "displayName": "Campania",
+      "capitalCity": "Napoli",
+      "shapeAssetName": "campania_shape",
+      "centerLatitude": 40.8518,
+      "centerLongitude": 14.2681,
+      "themeColorHex": "#E07B39"
+    }
+  ],
+  "places": [
+    {
+      "id": "firenze",
+      "regionId": "toscana",
+      "name": "Firenze",
+      "type": "city",
+      "province": "FI",
+      "latitude": 43.7696,
+      "longitude": 11.2558,
+      "shortDescription": "Culla del Rinascimento e capitale mondiale dell'arte, Firenze incanta con i suoi capolavori, ponti storici e tradizioni culinarie uniche.",
+      "docTips": [
+        "Mangia una schiacciata all'olio in un forno storico",
+        "Passeggia sul Ponte Vecchio al tramonto",
+        "Ordina un lampredotto dal trippaio ambulante",
+        "Visita gli Uffizi di prima mattina",
+        "Prendi un caffè al Caffè Gilli in Piazza della Repubblica"
+      ],
+      "badge": {
+        "title": "Fiorentino DOC",
+        "imageName": "fleur.de.lis.fill",
+        "description": "Hai conquistato la culla del Rinascimento!"
+      }
+    },
+    {
+      "id": "san_gimignano",
+      "regionId": "toscana",
+      "name": "San Gimignano",
+      "type": "borgo",
+      "province": "SI",
+      "latitude": 43.4677,
+      "longitude": 11.0430,
+      "shortDescription": "Il borgo delle belle torri, patrimonio UNESCO, famoso per la Vernaccia e le torri medievali che dominano il paesaggio.",
+      "docTips": [
+        "Conta tutte le 14 torri rimaste",
+        "Assaggia il gelato più premiato d'Italia da Dondoli",
+        "Bevi un bicchiere di Vernaccia locale",
+        "Passeggia sulle mura al tramonto",
+        "Compra dello zafferano locale DOP"
+      ],
+      "badge": {
+        "title": "Torriere Medievale",
+        "imageName": "building.columns.fill",
+        "description": "Hai scalato la Manhattan del Medioevo!"
+      }
+    },
+    {
+      "id": "siena",
+      "regionId": "toscana",
+      "name": "Siena",
+      "type": "city",
+      "province": "SI",
+      "latitude": 43.3188,
+      "longitude": 11.3308,
+      "shortDescription": "Città del Palio e gioiello gotico, Siena conquista con Piazza del Campo, il Duomo a strisce e le rivalità tra contrade.",
+      "docTips": [
+        "Siediti in Piazza del Campo a forma di conchiglia",
+        "Assaggia i ricciarelli e il panforte",
+        "Scegli una contrada e tifare per lei",
+        "Visita il Duomo e il pavimento intarsiato",
+        "Bevi un Brunello in un'enoteca storica"
+      ],
+      "badge": {
+        "title": "Contradaiolo",
+        "imageName": "flag.fill",
+        "description": "Il Palio scorre nelle tue vene!"
+      }
+    },
+    {
+      "id": "pitigliano",
+      "regionId": "toscana",
+      "name": "Pitigliano",
+      "type": "borgo",
+      "province": "GR",
+      "latitude": 42.6347,
+      "longitude": 11.6697,
+      "shortDescription": "La 'Piccola Gerusalemme' sorge su uno sperone di tufo. Borgo poco turistico con vie cave etrusche, sinagoga storica e vino bianco locale.",
+      "docTips": [
+        "Esplora le vie cave etrusche scavate nel tufo",
+        "Visita l'antica sinagoga e il ghetto ebraico",
+        "Assaggia lo sfratto dei goym, dolce tipico",
+        "Bevi il Bianco di Pitigliano in cantina",
+        "Fotografa il borgo dalla strada panoramica"
+      ],
+      "badge": {
+        "title": "Esploratore del Tufo",
+        "imageName": "mountain.2.fill",
+        "description": "Hai scoperto la Piccola Gerusalemme!"
+      }
+    },
+    {
+      "id": "roma",
+      "regionId": "lazio",
+      "name": "Roma",
+      "type": "city",
+      "province": "RM",
+      "latitude": 41.9028,
+      "longitude": 12.4964,
+      "shortDescription": "La Città Eterna, capitale d'Italia, dove ogni angolo racconta millenni di storia tra rovine imperiali, basiliche e la dolce vita.",
+      "docTips": [
+        "Lancia una moneta nella Fontana di Trevi",
+        "Mangia una carbonara vera (guanciale, non pancetta!)",
+        "Passeggia per Trastevere di sera",
+        "Visita il Colosseo all'alba",
+        "Prendi un supplì al telefono in rosticceria"
+      ],
+      "badge": {
+        "title": "Civis Romanus",
+        "imageName": "laurel.leading",
+        "description": "Tutte le strade portano a te!"
+      }
+    },
+    {
+      "id": "tivoli",
+      "regionId": "lazio",
+      "name": "Tivoli",
+      "type": "city",
+      "province": "RM",
+      "latitude": 41.9633,
+      "longitude": 12.7986,
+      "shortDescription": "Città delle ville e delle cascate, con Villa d'Este e i suoi giardini, Villa Adriana e le cascatelle naturali.",
+      "docTips": [
+        "Perditi nei giardini di Villa d'Este",
+        "Esplora le rovine di Villa Adriana",
+        "Ammira le cascatelle nel parco",
+        "Assaggia le pizzelle tiburtine",
+        "Fotografa le cento fontane al tramonto"
+      ],
+      "badge": {
+        "title": "Villeggiante Imperiale",
+        "imageName": "drop.fill",
+        "description": "Le fontane cantano per te!"
+      }
+    },
+    {
+      "id": "calcata",
+      "regionId": "lazio",
+      "name": "Calcata",
+      "type": "borgo",
+      "province": "VT",
+      "latitude": 42.2203,
+      "longitude": 12.4278,
+      "shortDescription": "Borgo hippie arroccato su uno sperone di tufo, quasi abbandonato negli anni '60 e riportato in vita da artisti e sognatori.",
+      "docTips": [
+        "Perdi l'orientamento nei vicoli senza auto",
+        "Visita una bottega d'artista",
+        "Scendi nella valle del Treja",
+        "Assaggia una tisana nel bar del borgo",
+        "Ammira il panorama dalla piazzetta"
+      ],
+      "badge": {
+        "title": "Spirito Libero",
+        "imageName": "paintpalette.fill",
+        "description": "L'arte scorre nelle vie di tufo!"
+      }
+    },
+    {
+      "id": "civita_bagnoregio",
+      "regionId": "lazio",
+      "name": "Civita di Bagnoregio",
+      "type": "borgo",
+      "province": "VT",
+      "latitude": 42.6275,
+      "longitude": 12.1139,
+      "shortDescription": "La città che muore, raggiungibile solo a piedi su un ponte sospeso. Uno dei borghi più suggestivi d'Italia.",
+      "docTips": [
+        "Attraversa il ponte pedonale al tramonto",
+        "Fotografa il borgo dalla Valle dei Calanchi",
+        "Assaggia i maccheroni con le noci",
+        "Visita la casa di San Bonaventura",
+        "Torna di notte per vedere le stelle"
+      ],
+      "badge": {
+        "title": "Camminatore di Ponti",
+        "imageName": "figure.walk",
+        "description": "Hai raggiunto la città che muore!"
+      }
+    },
+    {
+      "id": "napoli",
+      "regionId": "campania",
+      "name": "Napoli",
+      "type": "city",
+      "province": "NA",
+      "latitude": 40.8518,
+      "longitude": 14.2681,
+      "shortDescription": "Città del sole, del Vesuvio e della pizza. Napoli è caos, bellezza, storia stratificata e un cuore che batte fortissimo.",
+      "docTips": [
+        "Mangia una pizza margherita da Sorbillo o Da Michele",
+        "Passeggia per Spaccanapoli",
+        "Visita il Cristo Velato nella Cappella Sansevero",
+        "Prendi un caffè sospeso",
+        "Guarda il tramonto da Posillipo"
+      ],
+      "badge": {
+        "title": "Napoletano Verace",
+        "imageName": "sun.max.fill",
+        "description": "Vedi Napoli e poi muori... di felicità!"
+      }
+    },
+    {
+      "id": "pompei",
+      "regionId": "campania",
+      "name": "Pompei",
+      "type": "landmark",
+      "province": "NA",
+      "latitude": 40.7508,
+      "longitude": 14.4869,
+      "shortDescription": "La città romana sepolta dal Vesuvio nel 79 d.C. e cristallizzata nel tempo. Un viaggio indietro di 2000 anni.",
+      "docTips": [
+        "Cammina sulla via dell'Abbondanza",
+        "Visita la Villa dei Misteri",
+        "Trova i calchi dei corpi nel Foro",
+        "Entra nel Lupanare antico",
+        "Immagina la vita quotidiana romana"
+      ],
+      "badge": {
+        "title": "Archeologo del Tempo",
+        "imageName": "clock.arrow.circlepath",
+        "description": "Hai camminato nella storia!"
+      }
+    },
+    {
+      "id": "amalfi",
+      "regionId": "campania",
+      "name": "Amalfi",
+      "type": "city",
+      "province": "SA",
+      "latitude": 40.6340,
+      "longitude": 14.6027,
+      "shortDescription": "Perla della Costiera, antica Repubblica Marinara. Limoni, ceramiche, Duomo arabo-normanno e mare cristallino.",
+      "docTips": [
+        "Sali i 62 gradini del Duomo",
+        "Assaggia il limoncello fatto in casa",
+        "Compra carta fatta a mano",
+        "Nuota nella spiaggia sotto il borgo",
+        "Percorri il Sentiero degli Dei"
+      ],
+      "badge": {
+        "title": "Marinaio della Repubblica",
+        "imageName": "sailboat.fill",
+        "description": "Il mare è la tua casa!"
+      }
+    },
+    {
+      "id": "furore",
+      "regionId": "campania",
+      "name": "Furore",
+      "type": "borgo",
+      "province": "SA",
+      "latitude": 40.6189,
+      "longitude": 14.5492,
+      "shortDescription": "Il paese che non c'è - un borgo dipinto senza piazza, arroccato nel fiordo più spettacolare d'Italia. Poco conosciuto dai turisti.",
+      "docTips": [
+        "Scendi al Fiordo di Furore",
+        "Cerca i murales sulle case",
+        "Assaggia il vino locale nelle cantine",
+        "Fotografa il ponte sul fiordo",
+        "Trova la casa di Roberto Rossellini"
+      ],
+      "badge": {
+        "title": "Scopritore di Fiordi",
+        "imageName": "water.waves",
+        "description": "Hai trovato il paese che non c'è!"
+      }
+    }
+  ]
+}
