@@ -1,18 +1,16 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet, LayoutChangeEvent } from 'react-native';
 import {
     Canvas,
     Path,
     Skia,
-    TouchInfo,
-    useTouchHandler,
     Image,
     useImage,
     Group,
     Rect,
-    Paint,
 } from '@shopify/react-native-skia';
-import * as Haptics from 'expo-haptics';
+import { GestureDetector, Gesture } from 'react-native-gesture-handler';
+import { runOnJS } from 'react-native-reanimated';
 
 interface ScratchCardProps {
     imageSource: any; // require(...) or URI
@@ -29,31 +27,42 @@ export default function ScratchCard({
     const image = useImage(imageSource);
     const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
 
-    const touchHandler = useTouchHandler({
-        onStart: ({ x, y }) => {
+    // Wrapper to update state from UI thread
+    const addPath = (x: number, y: number) => {
+        setPaths((prev) => {
             const newPath = Skia.Path.Make();
             newPath.moveTo(x, y);
-            setPaths((prev) => [...prev, newPath]);
-        },
-        onActive: ({ x, y }) => {
-            setPaths((prev) => {
-                const currentPath = prev[prev.length - 1];
-                if (currentPath) {
-                    currentPath.lineTo(x, y);
-                    // Trigger Haptics occasionally or on move, throttle for performance
-                    // Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                return [...prev];
-            });
-        },
-        onEnd: () => {
-            // Calculate progress here if needed
-            // Simple logic: if enough paths, trigger reveal
-            if (paths.length > 10 && onReveal) {
-                onReveal();
+            return [...prev, newPath];
+        });
+    };
+
+    const updatePath = (x: number, y: number) => {
+        setPaths((prev) => {
+            const currentPath = prev[prev.length - 1];
+            if (currentPath) {
+                currentPath.lineTo(x, y);
             }
-        },
-    });
+            return [...prev]; // Return new array to trigger re-render
+        });
+    };
+
+    const checkReveal = () => {
+        if (paths.length > 20 && onReveal) {
+            onReveal();
+        }
+    };
+
+    const pan = Gesture.Pan()
+        .minDistance(1)
+        .onStart((g) => {
+            runOnJS(addPath)(g.x, g.y);
+        })
+        .onUpdate((g) => {
+            runOnJS(updatePath)(g.x, g.y);
+        })
+        .onEnd(() => {
+            runOnJS(checkReveal)();
+        });
 
     const onLayout = (event: LayoutChangeEvent) => {
         setCanvasSize({
@@ -67,43 +76,45 @@ export default function ScratchCard({
     }
 
     return (
-        <View style={styles.container} onLayout={onLayout}>
-            <Canvas style={styles.canvas} onTouch={touchHandler}>
-                {/* Helper to fit image cover */}
-                <Image
-                    image={image}
-                    fit="cover"
-                    x={0}
-                    y={0}
-                    width={canvasSize.width}
-                    height={canvasSize.height}
-                />
-
-                {/* Overlay Layer */}
-                <Group layer>
-                    <Rect
+        <GestureDetector gesture={pan}>
+            <View style={styles.container} onLayout={onLayout}>
+                <Canvas style={styles.canvas}>
+                    {/* Badge Image (Bottom Layer) */}
+                    <Image
+                        image={image}
+                        fit="contain"
                         x={0}
                         y={0}
                         width={canvasSize.width}
                         height={canvasSize.height}
-                        color="#C0C0C0" // Silver scratch color
                     />
-                    {/* Paths to cut out from overlay */}
-                    {paths.map((path, index) => (
-                        <Path
-                            key={index}
-                            path={path}
-                            strokeWidth={brushSize}
-                            style="stroke"
-                            strokeJoin="round"
-                            strokeCap="round"
-                            blendMode="dstOut"
-                            color="white" // Color doesn't matter for dstOut
+
+                    {/* Scratch Overlay (Top Layer) */}
+                    <Group layer>
+                        <Rect
+                            x={0}
+                            y={0}
+                            width={canvasSize.width}
+                            height={canvasSize.height}
+                            color="#C0C0C0" // Silver
                         />
-                    ))}
-                </Group>
-            </Canvas>
-        </View>
+                        {/* Eraser Paths */}
+                        {paths.map((path, index) => (
+                            <Path
+                                key={index}
+                                path={path}
+                                strokeWidth={brushSize}
+                                style="stroke"
+                                strokeJoin="round"
+                                strokeCap="round"
+                                blendMode="dstOut"
+                                color="white"
+                            />
+                        ))}
+                    </Group>
+                </Canvas>
+            </View>
+        </GestureDetector>
     );
 }
 
@@ -114,6 +125,7 @@ const styles = StyleSheet.create({
         height: '100%',
         overflow: 'hidden',
         borderRadius: 16,
+        backgroundColor: 'transparent', // Ensure background doesn't block
     },
     canvas: {
         flex: 1,

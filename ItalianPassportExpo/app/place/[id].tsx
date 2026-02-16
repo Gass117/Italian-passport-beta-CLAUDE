@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator, Alert, TouchableOpacity, Image } from 'react-native';
 import { PLACES_DATA } from '@/src/data/places';
 import { useLocationCheck } from '@/src/hooks/useLocationCheck';
 import { usePassportStore } from '@/src/store/usePassportStore';
@@ -56,9 +56,21 @@ export default function PlaceScreen() {
                 <View className="h-80 w-full bg-slate-100 rounded-2xl overflow-hidden mb-8 shadow-sm border border-slate-200 justify-center items-center">
                     {isUnlocked ? (
                         <View className="items-center p-4">
-                            <View className="w-32 h-32 bg-yellow-100 rounded-full items-center justify-center mb-4">
-                                {/* TODO: Render Icon properly. For now text/lucide */}
-                                <LucideUnlock size={64} color="#eab308" />
+                            <View className="w-40 h-40 bg-transparent rounded-full items-center justify-center mb-4 shadow-lg">
+                                {/* Show the actual badge image if available */}
+                                {place.badge.imageAsset ? (
+                                    <View style={{ width: 160, height: 160, borderRadius: 80, overflow: 'hidden' }}>
+                                        <Image
+                                            source={place.badge.imageAsset}
+                                            style={{ width: '100%', height: '100%' }}
+                                            resizeMode="cover"
+                                        />
+                                    </View>
+                                ) : (
+                                    <View className="w-32 h-32 bg-yellow-100 rounded-full items-center justify-center">
+                                        <LucideUnlock size={64} color="#eab308" />
+                                    </View>
+                                )}
                             </View>
                             <Text className="text-xl font-bold text-yellow-700">{place.badge.title}</Text>
                             <Text className="text-center text-slate-500 mt-2">{place.badge.description}</Text>
@@ -71,7 +83,7 @@ export default function PlaceScreen() {
                                 <>
                                     {canScratch ? (
                                         <ScratchCard
-                                            imageSource={require('@/assets/images/icon.png')} // TODO: Badge Image
+                                            imageSource={place.badge.imageAsset || require('@/assets/images/icon.png')}
                                             onReveal={handleReveal}
                                         />
                                     ) : (

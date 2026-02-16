@@ -270,28 +270,7 @@ export const PLACES_DATA: PlacesData = {
                 "description": "Il Palio scorre nelle tue vene!"
             }
         },
-        {
-            "id": "viareggio",
-            "regionId": "toscana",
-            "name": "Viareggio",
-            "type": "city",
-            "province": "LU",
-            "latitude": 43.8668,
-            "longitude": 10.2504,
-            "shortDescription": "La perla della Versilia, famosa per il suo Carnevale storico, il lungomare in stile Liberty e le lunghe spiagge sabbiose.",
-            "docTips": [
-                "Passeggia sulla Passeggiata Liberty",
-                "Assisti alla sfilata dei carri di Carnevale",
-                "Mangia un fritto misto in darsena",
-                "Rilassati in uno stabilimento balneare storico",
-                "Visita la Cittadella del Carnevale"
-            ],
-            "badge": {
-                "title": "Maschera di Burlamacco",
-                "imageName": "theatermasks.fill", // SF: theatermasks.fill -> Masks/Comedy
-                "description": "La vita è un carnevale!"
-            }
-        },
+
         {
             "id": "pitigliano",
             "regionId": "toscana",
@@ -488,6 +467,29 @@ export const PLACES_DATA: PlacesData = {
                 "title": "Scopritore di Fiordi",
                 "imageName": "water.waves", // SF: water.waves -> Waves
                 "description": "Hai trovato il paese che non c'è!"
+            }
+        },
+        {
+            "id": "viareggio",
+            "regionId": "toscana",
+            "name": "Viareggio",
+            "type": "city",
+            "province": "LU",
+            "latitude": 43.8668,
+            "longitude": 10.2430,
+            "shortDescription": "La perla della Versilia, famosa per il suo Carnevale, le lunghe spiagge di sabbia e l'architettura Liberty.",
+            "docTips": [
+                "Partecipa alla sfilata dei carri di Carnevale",
+                "Passeggia lungo la Passeggiata Margherita",
+                "Mangia il cacciucco alla viareggina",
+                "Rilassati in uno stabilimento balneare storico",
+                "Ammira i villini Liberty"
+            ],
+            "badge": {
+                "title": "Re del Carnevale",
+                "imageName": "party.popper",
+                "description": "La vita è un carnevale!",
+                "imageAsset": require('@/assets/images/react-logo.png')
             }
         }
     ]

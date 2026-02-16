@@ -13,6 +13,7 @@ export interface Badge {
   title: string;
   imageName: string; // SF Symbol name to be mapped or Lucide icon
   description: string;
+  imageAsset?: any; // require(...) or URI
 }
 
 export type PlaceType = 'city' | 'borgo' | 'landmark';
