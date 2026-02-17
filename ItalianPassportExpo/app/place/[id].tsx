@@ -12,9 +12,26 @@ export default function PlaceScreen() {
     const router = useRouter();
     const place = PLACES_DATA.places.find((p) => p.id === id);
 
-    const isUnlocked = usePassportStore((state) => state.isPlaceUnlocked(id as string));
+    // Debug log
+    useEffect(() => {
+        if (place) {
+            console.log("Place:", place.name, "Badge Asset:", place.badge.imageAsset);
+        }
+    }, [place]);
+
+    const isUnlocked = usePassportStore((state) => state.isPlaceUnlocked(place?.id || ""));
+    const markPlaceAsScratched = usePassportStore((state) => state.markPlaceAsScratched);
     const unlockPlace = usePassportStore((state) => state.unlockPlace);
+    const scratchedPlaceIds = usePassportStore((state) => state.scratchedPlaceIds);
     const gpsThreshold = usePassportStore((state) => state.gpsThreshold);
+
+    const handleReveal = () => {
+        if (place) {
+            markPlaceAsScratched(place.id);
+            unlockPlace(place.id); // Ensure it's also marked as visited/unlocked
+            Alert.alert("Complimenti!", `Hai sbloccato il badge: ${place.badge.title}`);
+        }
+    };
 
     // We only check location if not unlocked
     const { distance, loading, errorMsg, refresh } = useLocationCheck(
@@ -32,11 +49,6 @@ export default function PlaceScreen() {
         }
     }, [distance, gpsThreshold]);
 
-    const handleReveal = () => {
-        unlockPlace(id as string);
-        Alert.alert("Complimenti!", `Hai sbloccato il badge: ${place?.badge.title}`);
-    };
-
     if (!place) return <View><Text>Luogo non trovato</Text></View>;
 
     return (
@@ -53,41 +65,65 @@ export default function PlaceScreen() {
             <View className="p-6">
 
                 {/* Interaction Area */}
-                <View className="h-80 w-full bg-slate-100 rounded-2xl overflow-hidden mb-8 shadow-sm border border-slate-200 justify-center items-center">
-                    {isUnlocked ? (
-                        <View className="items-center p-4">
-                            <View className="w-40 h-40 bg-transparent rounded-full items-center justify-center mb-4 shadow-lg">
-                                {/* Show the actual badge image if available */}
-                                {place.badge.imageAsset ? (
-                                    <View style={{ width: 160, height: 160, borderRadius: 80, overflow: 'hidden' }}>
+                <View className="h-96 w-full bg-slate-100 rounded-2xl mb-8 shadow-sm border border-slate-200 justify-center items-center overflow-hidden">
+                    {/* 
+                        CONDITION 1: ALREADY SCRATCHED (Unlocked & Scratched)
+                        Show the Big Sticker directly.
+                    */}
+                    {scratchedPlaceIds.includes(place.id) ? (
+                        <View className="items-center justify-center p-4">
+                            <View style={{
+                                width: 280,
+                                height: 280,
+                                borderRadius: 140,
+                                backgroundColor: 'white',
+                                shadowColor: "#000",
+                                shadowOffset: { width: 0, height: 10 },
+                                shadowOpacity: 0.5,
+                                shadowRadius: 12,
+                                elevation: 15,
+                            }}>
+                                <View style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    borderRadius: 140,
+                                    overflow: 'hidden',
+                                    borderWidth: 8,
+                                    borderColor: 'white',
+                                }}>
+                                    {place.badge.imageAsset ? (
                                         <Image
                                             source={place.badge.imageAsset}
                                             style={{ width: '100%', height: '100%' }}
                                             resizeMode="cover"
                                         />
-                                    </View>
-                                ) : (
-                                    <View className="w-32 h-32 bg-yellow-100 rounded-full items-center justify-center">
-                                        <LucideUnlock size={64} color="#eab308" />
-                                    </View>
-                                )}
+                                    ) : (
+                                        <View className="flex-1 bg-green-100 items-center justify-center">
+                                            <LucideUnlock size={80} color="#15803d" />
+                                        </View>
+                                    )}
+                                </View>
                             </View>
-                            <Text className="text-xl font-bold text-yellow-700">{place.badge.title}</Text>
-                            <Text className="text-center text-slate-500 mt-2">{place.badge.description}</Text>
                         </View>
                     ) : (
+                        /* 
+                           CONDITION 2: NOT SCRATCHED YET
+                           Check if user is allowed to scratch (Unlocked via GPS or Debug)
+                        */
                         <>
-                            {loading ? (
-                                <ActivityIndicator size="large" color="#22c55e" />
+                            {(isUnlocked || canScratch) ? (
+                                /* SHOW SCRATCH CARD */
+                                <ScratchCard
+                                    imageSource={place.badge.imageAsset || require('@/assets/images/icon.png')}
+                                    onReveal={handleReveal}
+                                />
                             ) : (
-                                <>
-                                    {canScratch ? (
-                                        <ScratchCard
-                                            imageSource={place.badge.imageAsset || require('@/assets/images/icon.png')}
-                                            onReveal={handleReveal}
-                                        />
+                                /* LOCKED STATE (Too far) */
+                                <View className="items-center p-6">
+                                    {loading ? (
+                                        <ActivityIndicator size="large" color="#22c55e" />
                                     ) : (
-                                        <View className="items-center p-6">
+                                        <>
                                             <LucideMapPin size={48} color="#94a3b8" />
                                             <Text className="text-lg font-semibold text-slate-700 mt-4 text-center">
                                                 Sei troppo lontano
@@ -110,9 +146,9 @@ export default function PlaceScreen() {
                                                     <Text className="text-red-600 text-xs">Debug: Force Scratch</Text>
                                                 </TouchableOpacity>
                                             )}
-                                        </View>
+                                        </>
                                     )}
-                                </>
+                                </View>
                             )}
                         </>
                     )}

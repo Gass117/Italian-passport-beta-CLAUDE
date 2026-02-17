@@ -8,6 +8,7 @@ import {
     useImage,
     Group,
     Rect,
+    Circle,
 } from '@shopify/react-native-skia';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import { runOnJS } from 'react-native-reanimated';
@@ -24,6 +25,7 @@ export default function ScratchCard({
     brushSize = 40,
 }: ScratchCardProps) {
     const [paths, setPaths] = useState<any[]>([]);
+    const [scratchProgress, setScratchProgress] = useState(0); // Track amount scratched
     const image = useImage(imageSource);
     const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
 
@@ -44,10 +46,14 @@ export default function ScratchCard({
             }
             return [...prev]; // Return new array to trigger re-render
         });
+        // Increment progress (simple counter of movement events)
+        setScratchProgress(prev => prev + 1);
     };
 
     const checkReveal = () => {
-        if (paths.length > 20 && onReveal) {
+        // Threshold: ~100 movement events (adjust as needed)
+        // This is much more reliable than paths.length because one long stroke is 1 path but many updates.
+        if (scratchProgress > 100 && onReveal) {
             onReveal();
         }
     };
@@ -79,15 +85,36 @@ export default function ScratchCard({
         <GestureDetector gesture={pan}>
             <View style={styles.container} onLayout={onLayout}>
                 <Canvas style={styles.canvas}>
-                    {/* Badge Image (Bottom Layer) */}
-                    <Image
-                        image={image}
-                        fit="contain"
-                        x={0}
-                        y={0}
-                        width={canvasSize.width}
-                        height={canvasSize.height}
-                    />
+                    {/* Badge Image (Bottom Layer) - Centered Sticker Style */}
+                    <Group>
+                        {/* Shadow simulation (optional, gray circle offset) */}
+                        <Circle
+                            cx={canvasSize.width / 2}
+                            cy={canvasSize.height / 2 + 8} // Increased offset
+                            r={150} // 140 radius + 10 border
+                            color="#00000040"
+                        />
+
+                        {/* White Border */}
+                        <Circle
+                            cx={canvasSize.width / 2}
+                            cy={canvasSize.height / 2}
+                            r={145} // 140 image radius + 5 border
+                            color="white"
+                        />
+
+                        {/* The Image itself */}
+                        <Group clip={Skia.Path.Make().addCircle(canvasSize.width / 2, canvasSize.height / 2, 140)}>
+                            <Image
+                                image={image}
+                                fit="cover"
+                                x={canvasSize.width / 2 - 140}
+                                y={canvasSize.height / 2 - 140}
+                                width={280}
+                                height={280}
+                            />
+                        </Group>
+                    </Group>
 
                     {/* Scratch Overlay (Top Layer) */}
                     <Group layer>
