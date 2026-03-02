@@ -1,13 +1,16 @@
-import React from 'react';
-import { View, Text, FlatList, Image } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, FlatList, Image, TouchableOpacity, Modal } from 'react-native';
 import { usePassportStore } from '@/src/store/usePassportStore';
 import { PLACES_DATA } from '@/src/data/places';
 import { LucideUnlock, LucideLock } from 'lucide-react-native';
+import Badge3DViewer from '@/src/components/Badge3DViewer';
+import { Place } from '@/src/types';
 
 export default function CollectionScreen() {
     const visitedPlaceIds = usePassportStore((state) => state.visitedPlaceIds);
     const scratchedPlaceIds = usePassportStore((state) => state.scratchedPlaceIds);
     const allPlaces = PLACES_DATA.places;
+    const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
 
     return (
         <View className="flex-1 bg-white pt-12 px-4">
@@ -35,10 +38,14 @@ export default function CollectionScreen() {
                     // Optionally, we could show a different state for "Visited but NOT Scratched" (e.g. bouncing lock?)
                     // For now, sticking to user request: "una volta grattato... si sblocchi" implies otherwise locked.
                     return (
-                        <View className="w-[30%] items-center mb-6">
-                            <View
-                                className="mb-2 relative items-center justify-center"
-                            >
+                        <TouchableOpacity
+                            className="w-[30%] items-center mb-6"
+                            activeOpacity={isUnlocked ? 0.7 : 1}
+                            onPress={() => {
+                                if (isUnlocked) setSelectedPlace(item);
+                            }}
+                        >
+                            <View className="mb-2 relative items-center justify-center">
                                 {/* Outer Shadow Container */}
                                 <View style={isUnlocked ? {
                                     width: 96, // w-24 = 6rem = 96px
@@ -99,10 +106,25 @@ export default function CollectionScreen() {
                             <Text className="text-[10px] text-center text-slate-400 w-full mt-1">
                                 {item.name}
                             </Text>
-                        </View>
+                        </TouchableOpacity>
                     );
                 }}
             />
+
+            {/* 3D Viewer Modal */}
+            <Modal
+                visible={!!selectedPlace}
+                animationType="fade"
+                transparent={true}
+                onRequestClose={() => setSelectedPlace(null)}
+            >
+                {selectedPlace && (
+                    <Badge3DViewer
+                        place={selectedPlace}
+                        onClose={() => setSelectedPlace(null)}
+                    />
+                )}
+            </Modal>
         </View>
     );
 }
