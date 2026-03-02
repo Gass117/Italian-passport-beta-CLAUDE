@@ -4,6 +4,10 @@ import { View, Text, FlatList, TouchableOpacity, Image } from 'react-native';
 import { PLACES_DATA } from '@/src/data/places';
 import { LucideChevronRight, LucideMapPin } from 'lucide-react-native';
 import { usePassportStore } from '@/src/store/usePassportStore';
+import Svg, { Path } from 'react-native-svg';
+import { REGION_PATHS } from '@/src/components/Map/RegionPaths';
+import { getMacroRegion } from '@/src/components/Map/ItalyMap';
+import { REGION_BBOXES } from '@/src/components/Map/RegionBBoxes';
 
 export default function RegionScreen() {
     const { id } = useLocalSearchParams();
@@ -20,6 +24,9 @@ export default function RegionScreen() {
         );
     }
 
+    const macroMode = getMacroRegion(region.id);
+    const regionBBox = REGION_BBOXES[region.id];
+
     return (
         <View className="flex-1 bg-white">
             <Stack.Screen options={{ title: region.displayName }} />
@@ -30,8 +37,34 @@ export default function RegionScreen() {
                 contentContainerStyle={{ padding: 16 }}
                 ListHeaderComponent={() => (
                     <View className="mb-6">
+                        {/* MAP HIGHLIGHT */}
+                        <View className="items-center justify-center mb-6">
+                            <View
+                                className="bg-blue-50/50 rounded-2xl items-center justify-center border border-slate-100 shadow-sm overflow-hidden"
+                                style={{
+                                    height: 240, // Roughly 25% larger than the old h-48 (192px)
+                                    aspectRatio: regionBBox ? regionBBox.aspectRatio : 1,
+                                    maxWidth: '100%'
+                                }}
+                            >
+                                <Svg
+                                    viewBox={regionBBox ? regionBBox.viewBox : "0 0 610 800"}
+                                    className="w-full h-full"
+                                    preserveAspectRatio="xMidYMid meet"
+                                >
+                                    <Path
+                                        d={REGION_PATHS[region.id]}
+                                        fill={region.themeColorHex}
+                                        stroke="white"
+                                        strokeWidth="3"
+                                        transform=""
+                                    />
+                                </Svg>
+                            </View>
+                        </View>
+
                         <Text className="text-3xl font-bold text-slate-800">{region.displayName}</Text>
-                        <Text className="text-slate-500 mt-2">Capitale: {region.capitalCity}</Text>
+                        <Text className="text-slate-500 mt-2 font-medium tracking-wide">CAPOLUOGO: {region.capitalCity.toUpperCase()}</Text>
                     </View>
                 )}
                 renderItem={({ item }) => {

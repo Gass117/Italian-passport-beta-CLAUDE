@@ -13,16 +13,15 @@ interface ItalyMapProps {
 
 type ViewMode = 'ALL' | 'NORTH' | 'CENTER' | 'SOUTH';
 
-// PRECISE Bounding Boxes to make each Region feel like a "Standalone State"
-const MACRO_CONFIG: Record<ViewMode, { viewBox: string; aspectRatio: any; title: string }> = {
+export const MACRO_CONFIG: Record<ViewMode, { viewBox: string; aspectRatio: any; title: string }> = {
     // ALL: Standard Italy view, slightly taller viewBox to breathe
     ALL: { viewBox: "0 0 610 800", aspectRatio: "3/4", title: "L'Italia" },
 
     // NORTH: without Emilia.
-    // User requested: "ingrandisci il nord del 7% e poi se serve spostalo in modo da centrarlo nel riquadro bianco".
-    // 7% zoom -> shrink width from 440 to 410. Height to 308.
-    // Adjusted minX to -40 and minY to +15 to perfectly center it within the 4/3 aspect ratio card.
-    NORTH: { viewBox: "-40 15 410 308", aspectRatio: "4/3", title: "Nord Italia" },
+    // User requested: "il nord va spostato ancora un po' verso la sinistra del riquadro bianco".
+    // Shift map LEFT = shift camera RIGHT (increase minX).
+    // Let's change minX from -50 to -15, and keep minY at -5.
+    NORTH: { viewBox: "-15 -5 395 296", aspectRatio: "4/3", title: "Nord Italia" },
 
     // CENTER: includes Emilia, Toscana, Marche, Umbria, Lazio.
     // User says "Il centro è perfetto."
@@ -36,7 +35,7 @@ const MACRO_CONFIG: Record<ViewMode, { viewBox: string; aspectRatio: any; title:
     SOUTH: { viewBox: "220 268 400 533", aspectRatio: "3/4", title: "Sud e Isole" }
 };
 
-const MACRO_REGIONS: Record<string, ViewMode> = {
+export const MACRO_REGIONS: Record<string, ViewMode> = {
     'lombardia': 'NORTH', 'piemonte': 'NORTH', 'valle_aosta': 'NORTH',
     'liguria': 'NORTH', 'veneto': 'NORTH', 'trentino': 'NORTH',
     'friuli': 'NORTH',
@@ -49,14 +48,14 @@ const MACRO_REGIONS: Record<string, ViewMode> = {
     'sicilia': 'SOUTH', 'sardegna': 'SOUTH'
 };
 
+export const getMacroRegion = (regionId: string): ViewMode => {
+    return MACRO_REGIONS[regionId] || 'ALL';
+};
+
 export default function ItalyMap({ onRegionPress }: ItalyMapProps) {
     const router = useRouter();
     const { visitedPlaceIds } = usePassportStore();
     const [viewMode, setViewMode] = useState<ViewMode>('ALL');
-
-    const getMacroRegion = (regionId: string): ViewMode => {
-        return MACRO_REGIONS[regionId] || 'ALL';
-    };
 
     const handlePress = (regionId: string) => {
         if (viewMode === 'ALL') {
