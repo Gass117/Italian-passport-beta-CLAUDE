@@ -13,16 +13,19 @@ export default function CollectionScreen() {
     const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
 
     return (
-        <View className="flex-1 bg-white pt-12 px-4">
-            <Text className="text-3xl font-bold text-slate-800 mb-6">La tua Collezione</Text>
+        <View className="flex-1 bg-white dark:bg-slate-900 pt-12 px-4">
+            <Text className="text-3xl font-bold text-slate-800 dark:text-white mb-6">La tua Collezione</Text>
 
-            <View className="bg-green-50 p-4 rounded-xl mb-6 flex-row justify-between items-center shadow-sm">
+            <View
+                className="bg-green-50 dark:bg-green-950 p-4 rounded-xl mb-6 flex-row justify-between items-center"
+                style={{ elevation: 2, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 2, shadowOffset: { width: 0, height: 1 } }}
+            >
                 <View>
-                    <Text className="text-slate-600 font-medium">Timbri Sbloccati</Text>
-                    <Text className="text-sm text-slate-500">Gratta i luoghi visitati!</Text>
+                    <Text className="text-slate-600 dark:text-slate-300 font-medium">Timbri Sbloccati</Text>
+                    <Text className="text-sm text-slate-500 dark:text-slate-400">Gratta i luoghi visitati!</Text>
                 </View>
-                <Text className="text-3xl font-bold text-green-600">
-                    {scratchedPlaceIds.length} <Text className="text-lg text-slate-400">/ {allPlaces.length}</Text>
+                <Text className="text-3xl font-bold text-green-600 dark:text-green-500">
+                    {scratchedPlaceIds.length} <Text className="text-lg text-slate-400 dark:text-slate-500">/ {allPlaces.length}</Text>
                 </Text>
             </View>
 
@@ -47,35 +50,23 @@ export default function CollectionScreen() {
                         >
                             <View className="mb-2 relative items-center justify-center">
                                 {/* Outer Shadow Container */}
-                                <View style={isUnlocked ? {
-                                    width: 96, // w-24 = 6rem = 96px
-                                    height: 96,
-                                    borderRadius: 48,
-                                    backgroundColor: 'white',
-                                    shadowColor: "#000",
-                                    shadowOffset: { width: 0, height: 2 },
-                                    shadowOpacity: 0.25,
-                                    shadowRadius: 3.84,
-                                    elevation: 5,
-                                } : {
-                                    width: 96,
-                                    height: 96,
-                                    borderRadius: 48,
-                                    backgroundColor: '#f1f5f9', // slate-100
-                                    borderWidth: 1,
-                                    borderColor: '#e2e8f0' // slate-200
-                                }}>
+                                <View style={{
+                                    // Cleaned up for CSS interop compatibility:
+                                    ...(isUnlocked ? { elevation: 5, shadowColor: '#000', shadowOpacity: 0.25, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } } : {})
+                                }}
+                                    className={`mb-2 relative items-center justify-center rounded-full w-24 h-24 ${isUnlocked ? 'bg-white dark:bg-slate-800' : 'bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700'}`}
+                                >
                                     {/* Inner Clipping Container */}
                                     <View style={{
                                         width: '100%',
                                         height: '100%',
                                         borderRadius: 48,
                                         overflow: 'hidden',
-                                        borderWidth: isUnlocked ? 4 : 0,
-                                        borderColor: 'white',
                                         alignItems: 'center',
                                         justifyContent: 'center'
-                                    }}>
+                                    }}
+                                        className={`${isUnlocked ? 'border-4 border-white dark:border-slate-800' : ''}`}
+                                    >
                                         {isUnlocked && item.badge.imageAsset ? (
                                             <Image
                                                 source={item.badge.imageAsset}
@@ -92,18 +83,14 @@ export default function CollectionScreen() {
                                             </>
                                         )}
 
-                                        {/* Overlay for locked items */}
-                                        {!isUnlocked && (
-                                            <View className="absolute inset-0 bg-slate-200/50 items-center justify-center" />
-                                        )}
                                     </View>
                                 </View>
                             </View>
 
-                            <Text className={`text-xs text-center font-medium w-full ${isUnlocked ? 'text-slate-800' : 'text-slate-400'}`} numberOfLines={2}>
+                            <Text className={`text-xs text-center font-medium w-full ${isUnlocked ? 'text-slate-800 dark:text-slate-200' : 'text-slate-400 dark:text-slate-600'}`} numberOfLines={2}>
                                 {item.badge.title}
                             </Text>
-                            <Text className="text-[10px] text-center text-slate-400 w-full mt-1">
+                            <Text className="text-[10px] text-center text-slate-400 dark:text-slate-500 w-full mt-1">
                                 {item.name}
                             </Text>
                         </TouchableOpacity>
@@ -125,6 +112,6 @@ export default function CollectionScreen() {
                     />
                 )}
             </Modal>
-        </View>
+        </View >
     );
 }

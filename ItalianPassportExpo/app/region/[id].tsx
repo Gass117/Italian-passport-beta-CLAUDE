@@ -28,7 +28,7 @@ export default function RegionScreen() {
     const regionBBox = REGION_BBOXES[region.id];
 
     return (
-        <View className="flex-1 bg-white">
+        <View className="flex-1 bg-white dark:bg-slate-900">
             <Stack.Screen options={{ title: region.displayName }} />
 
             <FlatList
@@ -40,11 +40,16 @@ export default function RegionScreen() {
                         {/* MAP HIGHLIGHT */}
                         <View className="items-center justify-center mb-6">
                             <View
-                                className="bg-blue-50/50 rounded-2xl items-center justify-center border border-slate-100 shadow-sm overflow-hidden"
+                                className="bg-slate-50 dark:bg-slate-800 rounded-2xl items-center justify-center border border-slate-100 dark:border-slate-700 overflow-hidden"
                                 style={{
                                     height: 240, // Roughly 25% larger than the old h-48 (192px)
                                     aspectRatio: regionBBox ? regionBBox.aspectRatio : 1,
-                                    maxWidth: '100%'
+                                    maxWidth: '100%',
+                                    elevation: 2,
+                                    shadowColor: '#000',
+                                    shadowOpacity: 0.1,
+                                    shadowRadius: 2,
+                                    shadowOffset: { width: 0, height: 1 }
                                 }}
                             >
                                 <Svg
@@ -63,29 +68,29 @@ export default function RegionScreen() {
                             </View>
                         </View>
 
-                        <Text className="text-3xl font-bold text-slate-800">{region.displayName}</Text>
-                        <Text className="text-slate-500 mt-2 font-medium tracking-wide">CAPOLUOGO: {region.capitalCity.toUpperCase()}</Text>
+                        <Text className="text-3xl font-bold text-slate-800 dark:text-white">{region.displayName}</Text>
+                        <Text className="text-slate-500 dark:text-slate-400 mt-2 font-medium tracking-wide">CAPOLUOGO: {region.capitalCity.toUpperCase()}</Text>
                     </View>
                 )}
                 renderItem={({ item }) => {
                     const unlocked = isPlaceUnlocked(item.id);
                     return (
                         <TouchableOpacity
-                            className="bg-slate-50 p-4 rounded-xl mb-3 flex-row items-center border border-slate-200"
+                            className="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl mb-3 flex-row items-center border border-slate-200 dark:border-slate-700"
                             onPress={() => router.push(`/place/${item.id}`)}
                         >
-                            <View className="bg-green-100 p-3 rounded-full mr-4">
+                            <View className="bg-green-100 dark:bg-green-950 p-3 rounded-full mr-4">
                                 <LucideMapPin size={24} color="#16a34a" />
                             </View>
                             <View className="flex-1">
-                                <Text className="font-semibold text-lg text-slate-800">{item.name}</Text>
-                                <Text className="text-slate-500 text-sm" numberOfLines={1}>
+                                <Text className="font-semibold text-lg text-slate-800 dark:text-white">{item.name}</Text>
+                                <Text className="text-slate-500 dark:text-slate-400 text-sm" numberOfLines={1}>
                                     {item.shortDescription}
                                 </Text>
                             </View>
                             {unlocked && (
-                                <View className="bg-yellow-100 px-2 py-1 rounded mr-2">
-                                    <Text className="text-xs font-bold text-yellow-700">VISITATO</Text>
+                                <View className="bg-yellow-100 dark:bg-yellow-950 px-2 py-1 rounded mr-2 border border-yellow-200 dark:border-yellow-800">
+                                    <Text className="text-xs font-bold text-yellow-700 dark:text-yellow-500">VISITATO</Text>
                                 </View>
                             )}
                             <LucideChevronRight size={20} color="#94a3b8" />
@@ -93,7 +98,7 @@ export default function RegionScreen() {
                     );
                 }}
                 ListEmptyComponent={() => (
-                    <Text className="text-center text-slate-400 mt-10">
+                    <Text className="text-center text-slate-400 dark:text-slate-500 mt-10">
                         Nessun luogo disponibile in questa regione.
                     </Text>
                 )}

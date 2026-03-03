@@ -6,6 +6,7 @@ import { PLACES_DATA } from '@/src/data/places';
 import { useRouter } from 'expo-router';
 import { usePassportStore } from '@/src/store/usePassportStore';
 import { LucideZoomOut } from 'lucide-react-native';
+import { useColorScheme } from 'nativewind';
 
 interface ItalyMapProps {
     onRegionPress?: (regionId: string) => void;
@@ -55,6 +56,7 @@ export const getMacroRegion = (regionId: string): ViewMode => {
 export default function ItalyMap({ onRegionPress }: ItalyMapProps) {
     const router = useRouter();
     const { visitedPlaceIds } = usePassportStore();
+    const { colorScheme } = useColorScheme();
     const [viewMode, setViewMode] = useState<ViewMode>('ALL');
 
     const handlePress = (regionId: string) => {
@@ -79,12 +81,15 @@ export default function ItalyMap({ onRegionPress }: ItalyMapProps) {
     const currentConfig = MACRO_CONFIG[viewMode];
 
     return (
-        <View className="flex-1 items-center justify-center bg-blue-50 relative w-full h-full p-4">
+        <View className="flex-1 items-center justify-center bg-blue-50 dark:bg-slate-900 relative w-full h-full p-4">
 
             {/* Dynamic Header */}
             {viewMode !== 'ALL' && (
-                <View className="absolute top-10 z-10 bg-white/95 px-8 py-3 rounded-full shadow-lg border border-slate-100 transform scale-110">
-                    <Text className="text-xl font-black text-slate-800 tracking-widest uppercase">
+                <View
+                    className="absolute top-10 z-10 bg-white dark:bg-slate-800 px-8 py-3 rounded-full border border-slate-100 dark:border-slate-700 transform scale-110"
+                    style={{ elevation: 10, shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 10, shadowOffset: { width: 0, height: 4 } }}
+                >
+                    <Text className="text-xl font-black text-slate-800 dark:text-white tracking-widest uppercase">
                         {currentConfig.title}
                     </Text>
                 </View>
@@ -92,10 +97,14 @@ export default function ItalyMap({ onRegionPress }: ItalyMapProps) {
 
             {/* Map Container */}
             <View
-                className="w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden border-4 border-white"
+                className="w-full max-w-md bg-white dark:bg-slate-800 rounded-3xl overflow-hidden border-4 border-white dark:border-slate-800"
                 style={{
                     aspectRatio: currentConfig.aspectRatio,
-                    elevation: 10 // Android shadow
+                    elevation: 10,
+                    shadowColor: '#000',
+                    shadowOpacity: 0.25,
+                    shadowRadius: 10,
+                    shadowOffset: { width: 0, height: 6 }
                 }}
             >
                 <Svg
@@ -151,7 +160,7 @@ export default function ItalyMap({ onRegionPress }: ItalyMapProps) {
                                 <Path
                                     d={pathData}
                                     fill={color}
-                                    stroke="white"
+                                    stroke={colorScheme === 'dark' ? '#1e293b' : 'white'}
                                     // Strong Sticker outline for ALL states
                                     strokeWidth={viewMode === 'ALL' ? "2.5" : "3.5"}
                                     transform={regionTransform}
@@ -166,7 +175,8 @@ export default function ItalyMap({ onRegionPress }: ItalyMapProps) {
             {viewMode !== 'ALL' && (
                 <TouchableOpacity
                     onPress={handleZoomOut}
-                    className="absolute bottom-10 right-6 bg-slate-800 p-4 rounded-full shadow-xl flex-row items-center space-x-2 active:scale-95"
+                    className="absolute bottom-10 right-6 bg-slate-800 dark:bg-slate-700 p-4 rounded-full flex-row items-center space-x-2 active:scale-95"
+                    style={{ elevation: 12, shadowColor: '#000', shadowOpacity: 0.25, shadowRadius: 10, shadowOffset: { width: 0, height: 6 } }}
                 >
                     <LucideZoomOut size={22} color="white" />
                     <Text className="text-white font-bold text-sm ml-2">INDIETRO</Text>
@@ -176,7 +186,7 @@ export default function ItalyMap({ onRegionPress }: ItalyMapProps) {
             {/* Interaction Hint */}
             {viewMode === 'ALL' && (
                 <View className="absolute bottom-4 left-0 right-0 items-center pointer-events-none">
-                    <Text className="text-slate-400 text-xs text-center px-4 bg-white/50 py-1 rounded-full mx-auto">
+                    <Text className="text-slate-400 dark:text-slate-300 text-xs text-center px-4 bg-slate-100 dark:bg-slate-700 py-1 rounded-full mx-auto">
                         Tocca una zona per esplorare
                     </Text>
                 </View>

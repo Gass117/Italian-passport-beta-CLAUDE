@@ -6,11 +6,13 @@ interface PassportState {
     visitedPlaceIds: string[];
     scratchedPlaceIds: string[];
     gpsThreshold: number; // in meters
+    theme: 'light' | 'dark';
 
     unlockPlace: (placeId: string) => void;
     markPlaceAsScratched: (placeId: string) => void;
     isPlaceUnlocked: (placeId: string) => boolean;
     setGpsThreshold: (threshold: number) => void;
+    setTheme: (theme: 'light' | 'dark') => void;
     resetProgress: () => void;
     resetScratchedStatus: () => void;
 }
@@ -21,6 +23,7 @@ export const usePassportStore = create<PassportState>()(
             visitedPlaceIds: [],
             scratchedPlaceIds: [],
             gpsThreshold: 200,
+            theme: 'light',
 
             unlockPlace: (placeId: string) => {
                 const { visitedPlaceIds } = get();
@@ -42,6 +45,10 @@ export const usePassportStore = create<PassportState>()(
 
             setGpsThreshold: (threshold: number) => {
                 set({ gpsThreshold: threshold });
+            },
+
+            setTheme: (theme: 'light' | 'dark') => {
+                set({ theme });
             },
 
             resetProgress: () => {
