@@ -1,1 +1,6 @@
-export { useColorScheme } from 'nativewind';
+import { useColorScheme as useNWColorScheme } from 'nativewind';
+
+export function useColorScheme() {
+    const { colorScheme } = useNWColorScheme();
+    return colorScheme;
+}

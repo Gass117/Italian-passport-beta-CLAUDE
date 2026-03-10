@@ -2,7 +2,7 @@ import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import React from 'react';
 import { View, Text, FlatList, TouchableOpacity, Image } from 'react-native';
 import { PLACES_DATA } from '@/src/data/places';
-import { LucideChevronRight, LucideMapPin } from 'lucide-react-native';
+import { LucideChevronLeft, LucideChevronRight, LucideMapPin } from 'lucide-react-native';
 import { usePassportStore } from '@/src/store/usePassportStore';
 import Svg, { Path } from 'react-native-svg';
 import { REGION_PATHS } from '@/src/components/Map/RegionPaths';
@@ -29,7 +29,20 @@ export default function RegionScreen() {
 
     return (
         <View className="flex-1 bg-white dark:bg-slate-900">
-            <Stack.Screen options={{ title: region.displayName }} />
+            <Stack.Screen 
+                options={{ 
+                    title: region.displayName,
+                    headerLeft: () => (
+                        <TouchableOpacity 
+                            onPress={() => router.back()} 
+                            style={{ marginLeft: 8, marginRight: 16, padding: 4 }}
+                            hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+                        >
+                            <LucideChevronLeft size={32} color="#3b82f6" />
+                        </TouchableOpacity>
+                    )
+                }} 
+            />
 
             <FlatList
                 data={places}
@@ -42,9 +55,10 @@ export default function RegionScreen() {
                             <View
                                 className="bg-slate-50 dark:bg-slate-800 rounded-2xl items-center justify-center border border-slate-100 dark:border-slate-700 overflow-hidden"
                                 style={{
-                                    height: 240, // Roughly 25% larger than the old h-48 (192px)
+                                    width: '100%',
+                                    // Use aspectRatio so height is strictly derived from width
                                     aspectRatio: regionBBox ? regionBBox.aspectRatio : 1,
-                                    maxWidth: '100%',
+                                    maxHeight: 260, // Ensure very tall regions don't occupy too much height
                                     elevation: 2,
                                     shadowColor: '#000',
                                     shadowOpacity: 0.1,
@@ -53,8 +67,9 @@ export default function RegionScreen() {
                                 }}
                             >
                                 <Svg
+                                    // Expand internal SVG slightly so the outline stroke isn't cropped by viewBox margins
                                     viewBox={regionBBox ? regionBBox.viewBox : "0 0 610 800"}
-                                    className="w-full h-full"
+                                    style={{ width: '92%', height: '92%' }}
                                     preserveAspectRatio="xMidYMid meet"
                                 >
                                     <Path

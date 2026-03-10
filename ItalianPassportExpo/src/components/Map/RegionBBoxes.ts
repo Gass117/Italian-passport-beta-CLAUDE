@@ -37,8 +37,8 @@ export const REGION_BBOXES: Record<string, { viewBox: string, aspectRatio: numbe
         "aspectRatio": 1.0029556650246327
     },
     "liguria": {
-        "viewBox": "38.34620999999995 174.3650100000001 145.06799999999998 70.96099999999996",
-        "aspectRatio": 2.044334211750117
+        "viewBox": "35 170 150 78", // tight bounds around minX:38, maxX:183, minY:174, maxY:245
+        "aspectRatio": 1.92 // 150 / 78
     },
     "lombardia": {
         "viewBox": "88.79071000000005 27.33500475000016 165.2089999999999 157.42100549999986",

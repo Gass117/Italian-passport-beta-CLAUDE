@@ -11,6 +11,7 @@ export default function TabLayout() {
       screenOptions={{
         tabBarActiveTintColor: '#22c55e', // Green
         tabBarInactiveTintColor: colorScheme === 'dark' ? '#94a3b8' : '#64748b',
+        animation: 'shift', // Shift creates a smooth horizontal slide/fade hybrid natively on tabs
         tabBarStyle: {
           backgroundColor: colorScheme === 'dark' ? '#0f172a' : '#ffffff',
           borderTopColor: colorScheme === 'dark' ? '#1e293b' : '#e2e8f0'

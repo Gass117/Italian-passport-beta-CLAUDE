@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, TouchableOpacity, Text } from 'react-native';
+import { View, TouchableOpacity, Text, LayoutAnimation } from 'react-native';
 import Svg, { Path, G } from 'react-native-svg';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS } from 'react-native-reanimated';
 import { REGION_PATHS } from './RegionPaths';
 import { PLACES_DATA } from '@/src/data/places';
 import { useRouter } from 'expo-router';
@@ -29,11 +30,12 @@ export const MACRO_CONFIG: Record<ViewMode, { viewBox: string; aspectRatio: any;
     CENTER: { viewBox: "100 140 340 315", aspectRatio: "1/1", title: "Centro Italia" },
 
     // SOUTH: includes shifted Sardinia.
-    // User requested "il sud è ancora troppo spostato a destra e la puglia e tagliata, sposta tutto un po più a sinistra"
-    // By increasing minX we shift the camera right, which pushes the map to the left on screen.
-    // Old: "190 268 390 495". Right edge = 580.
-    // New: "220 268 400 533". Right edge = 620. (Aspect ratio 3/4 -> 400/533).
-    SOUTH: { viewBox: "220 268 400 533", aspectRatio: "3/4", title: "Sud e Isole" }
+    // User requested: "non ridimensionare ne spostare più la mappa... allunga solo il riquadro bianco verso il basso"
+    // Changing to 1/1 makes the container taller. To STOP the map from zooming up to fill that height, 
+    // we increase viewBox proportionally from 340 to 425, and adjust X to 178 so the physical scale and top-alignment match exactly the previous 5/4 box.
+    // By increasing minY to 300, we pan the camera down, revealing the hidden bottom of Sicily without changing map scale.
+    // By increasing minX to 215, we pan the camera right, moving the map slightly left to ensure Puglia is not cut off.
+    SOUTH: { viewBox: "215 300 425 425", aspectRatio: "1/1", title: "Sud e Isole" }
 };
 
 export const MACRO_REGIONS: Record<string, ViewMode> = {
@@ -59,11 +61,22 @@ export default function ItalyMap({ onRegionPress }: ItalyMapProps) {
     const { colorScheme } = useColorScheme();
     const [viewMode, setViewMode] = useState<ViewMode>('ALL');
 
+    const mapOpacity = useSharedValue(1);
+
+    const mapAnimatedStyle = useAnimatedStyle(() => {
+        return { opacity: mapOpacity.value };
+    });
+
     const handlePress = (regionId: string) => {
         if (viewMode === 'ALL') {
             const targetMode = getMacroRegion(regionId);
             if (targetMode !== 'ALL') {
-                setViewMode(targetMode);
+                mapOpacity.value = withTiming(0, { duration: 200 }, () => {
+                    runOnJS(LayoutAnimation.configureNext)(LayoutAnimation.Presets.easeInEaseOut);
+                    runOnJS(setViewMode)(targetMode);
+                    // Reduced to 200ms
+                    mapOpacity.value = withTiming(1, { duration: 200 });
+                });
             }
         } else {
             if (onRegionPress) {
@@ -75,18 +88,23 @@ export default function ItalyMap({ onRegionPress }: ItalyMapProps) {
     };
 
     const handleZoomOut = () => {
-        setViewMode('ALL');
+        // Both fade out and fade in reduced to 200ms
+        mapOpacity.value = withTiming(0, { duration: 200 }, () => {
+            runOnJS(LayoutAnimation.configureNext)(LayoutAnimation.Presets.easeInEaseOut);
+            runOnJS(setViewMode)('ALL');
+            mapOpacity.value = withTiming(1, { duration: 200 });
+        });
     };
 
     const currentConfig = MACRO_CONFIG[viewMode];
 
     return (
-        <View className="flex-1 items-center justify-center bg-blue-50 dark:bg-slate-900 relative w-full h-full p-4">
+        <View className="items-center justify-center relative w-full py-8 px-5">
 
             {/* Dynamic Header */}
             {viewMode !== 'ALL' && (
                 <View
-                    className="absolute top-10 z-10 bg-white dark:bg-slate-800 px-8 py-3 rounded-full border border-slate-100 dark:border-slate-700 transform scale-110"
+                    className="z-10 bg-white dark:bg-slate-800 px-8 py-3 rounded-full border border-slate-100 dark:border-slate-700 transform scale-110 mb-8"
                     style={{ elevation: 10, shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 10, shadowOffset: { width: 0, height: 4 } }}
                 >
                     <Text className="text-xl font-black text-slate-800 dark:text-white tracking-widest uppercase">
@@ -96,16 +114,19 @@ export default function ItalyMap({ onRegionPress }: ItalyMapProps) {
             )}
 
             {/* Map Container */}
-            <View
+            <Animated.View
                 className="w-full max-w-md bg-white dark:bg-slate-800 rounded-3xl overflow-hidden border-4 border-white dark:border-slate-800"
-                style={{
-                    aspectRatio: currentConfig.aspectRatio,
-                    elevation: 10,
-                    shadowColor: '#000',
-                    shadowOpacity: 0.25,
-                    shadowRadius: 10,
-                    shadowOffset: { width: 0, height: 6 }
-                }}
+                style={[
+                    {
+                        aspectRatio: currentConfig.aspectRatio,
+                        elevation: 10,
+                        shadowColor: '#000',
+                        shadowOpacity: 0.25,
+                        shadowRadius: 10,
+                        shadowOffset: { width: 0, height: 6 }
+                    },
+                    mapAnimatedStyle
+                ]}
             >
                 <Svg
                     viewBox={currentConfig.viewBox}
@@ -169,28 +190,31 @@ export default function ItalyMap({ onRegionPress }: ItalyMapProps) {
                         );
                     })}
                 </Svg>
-            </View>
+
+                {/* Interaction Hint (Moved Inside White Box) */}
+                {viewMode === 'ALL' && (
+                    <View className="absolute bottom-4 left-0 right-0 items-center pointer-events-none">
+                        <Text className="text-slate-400 dark:text-slate-500 text-xs text-center px-4 py-1 rounded-full mx-auto font-medium">
+                            Tocca una zona per esplorare
+                        </Text>
+                    </View>
+                )}
+            </Animated.View>
 
             {/* Back Button */}
             {viewMode !== 'ALL' && (
-                <TouchableOpacity
-                    onPress={handleZoomOut}
-                    className="absolute bottom-10 right-6 bg-slate-800 dark:bg-slate-700 p-4 rounded-full flex-row items-center space-x-2 active:scale-95"
-                    style={{ elevation: 12, shadowColor: '#000', shadowOpacity: 0.25, shadowRadius: 10, shadowOffset: { width: 0, height: 6 } }}
-                >
-                    <LucideZoomOut size={22} color="white" />
-                    <Text className="text-white font-bold text-sm ml-2">INDIETRO</Text>
-                </TouchableOpacity>
-            )}
-
-            {/* Interaction Hint */}
-            {viewMode === 'ALL' && (
-                <View className="absolute bottom-4 left-0 right-0 items-center pointer-events-none">
-                    <Text className="text-slate-400 dark:text-slate-300 text-xs text-center px-4 bg-slate-100 dark:bg-slate-700 py-1 rounded-full mx-auto">
-                        Tocca una zona per esplorare
-                    </Text>
+                <View className="w-full flex-row justify-end mt-6 pr-2">
+                    <TouchableOpacity
+                        onPress={handleZoomOut}
+                        className="bg-slate-800 dark:bg-slate-700 p-4 rounded-full flex-row items-center space-x-2 active:scale-95"
+                        style={{ elevation: 12, shadowColor: '#000', shadowOpacity: 0.25, shadowRadius: 10, shadowOffset: { width: 0, height: 6 } }}
+                    >
+                        <LucideZoomOut size={22} color="white" />
+                        <Text className="text-white font-bold text-sm ml-2">INDIETRO</Text>
+                    </TouchableOpacity>
                 </View>
             )}
+
         </View>
     );
 }
