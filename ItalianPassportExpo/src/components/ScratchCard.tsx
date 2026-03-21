@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, LayoutChangeEvent } from 'react-native';
+import { View, StyleSheet, LayoutChangeEvent, Text } from 'react-native';
 import {
     Canvas,
     Path,
@@ -9,9 +9,11 @@ import {
     Group,
     Rect,
     Circle,
+    LinearGradient,
+    vec
 } from '@shopify/react-native-skia';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
-import { runOnJS } from 'react-native-reanimated';
+import Animated, { runOnJS, useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
 
 interface ScratchCardProps {
     imageSource: any; // require(...) or URI
@@ -28,6 +30,26 @@ export default function ScratchCard({
     const [scratchProgress, setScratchProgress] = useState(0); // Track amount scratched
     const image = useImage(imageSource);
     const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
+
+    // Pulsing animation for the GRATTA text
+    const textScale = useSharedValue(1);
+
+    React.useEffect(() => {
+        if (scratchProgress === 0) {
+            textScale.value = withRepeat(
+                withSequence(
+                    withTiming(1.08, { duration: 800 }),
+                    withTiming(0.95, { duration: 800 })
+                ),
+                -1, // infinite
+                true // reverse
+            );
+        }
+    }, [scratchProgress]);
+
+    const animatedTextStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: textScale.value }]
+    }));
 
     // Wrapper to update state from UI thread
     const addPath = (x: number, y: number) => {
@@ -123,8 +145,14 @@ export default function ScratchCard({
                             y={0}
                             width={canvasSize.width}
                             height={canvasSize.height}
-                            color="#C0C0C0" // Silver
-                        />
+                        >
+                            <LinearGradient
+                                start={vec(0, 0)}
+                                end={vec(canvasSize.width, canvasSize.height)}
+                                colors={['#9ca3af', '#f3f4f6', '#9ca3af', '#d1d5db', '#6b7280']}
+                                positions={[0, 0.25, 0.5, 0.75, 1]}
+                            />
+                        </Rect>
                         {/* Eraser Paths */}
                         {paths.map((path, index) => (
                             <Path
@@ -140,6 +168,18 @@ export default function ScratchCard({
                         ))}
                     </Group>
                 </Canvas>
+                {scratchProgress === 0 && (
+                    <View style={StyleSheet.absoluteFill} pointerEvents="none" className="items-center justify-center">
+                        <Animated.Text 
+                            style={[
+                                { fontSize: 48, fontWeight: '900', color: 'rgba(255,255,255,0.95)', letterSpacing: 8, textShadowColor: 'rgba(0,0,0,0.4)', textShadowOffset: { width: 0, height: 4 }, textShadowRadius: 8 },
+                                animatedTextStyle
+                            ]}
+                        >
+                            GRATTA
+                        </Animated.Text>
+                    </View>
+                )}
             </View>
         </GestureDetector>
     );

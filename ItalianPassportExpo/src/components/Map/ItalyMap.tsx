@@ -8,6 +8,7 @@ import { useRouter } from 'expo-router';
 import { usePassportStore } from '@/src/store/usePassportStore';
 import { LucideZoomOut } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
+import ProgressCircle from '@/src/components/ProgressCircle';
 
 interface ItalyMapProps {
     onRegionPress?: (regionId: string) => void;
@@ -128,6 +129,13 @@ export default function ItalyMap({ onRegionPress }: ItalyMapProps) {
                     mapAnimatedStyle
                 ]}
             >
+                {/* Global Progress Circle inside the white map box */}
+                {viewMode === 'ALL' && (
+                    <View className="absolute top-4 right-4 z-20 pointer-events-none">
+                        <ProgressCircle size={44} strokeWidth={4} />
+                    </View>
+                )}
+
                 <Svg
                     viewBox={currentConfig.viewBox}
                     className="w-full h-full"

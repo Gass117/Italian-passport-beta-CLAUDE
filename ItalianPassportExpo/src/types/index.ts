@@ -28,6 +28,7 @@ export interface Place {
   longitude: number;
   shortDescription: string;
   docTips: string[];
+  nightTips?: string[];
   badge: Badge;
 }
 

@@ -31,7 +31,7 @@ export default function SettingsScreen() {
     const handleReset = () => {
         Alert.alert(
             "Attenzione",
-            "Sei sicuro di voler cancellare tutti i progressi?",
+            "Sei sicuro di voler cancellare tutti i progressi e i badge ottenuti?",
             [
                 { text: "Annulla", style: "cancel" },
                 {
@@ -39,7 +39,25 @@ export default function SettingsScreen() {
                     style: "destructive",
                     onPress: () => {
                         resetProgress();
-                        Alert.alert("Resettato", "I progressi sono stati cancellati.");
+                        Alert.alert("Resettato", "La mappa e le attività sono state ripristinate.");
+                    }
+                }
+            ]
+        );
+    };
+
+    const handleResetTips = () => {
+        Alert.alert(
+            "Azzera Attività",
+            "Vuoi rimuovere le spunte da tutte le attività completate?",
+            [
+                { text: "Annulla", style: "cancel" },
+                {
+                    text: "Conferma",
+                    style: "destructive",
+                    onPress: () => {
+                        usePassportStore.setState({ completedTips: {} });
+                        Alert.alert("Fatto", "Tutte le attività sono state ripristinate.");
                     }
                 }
             ]
@@ -65,21 +83,21 @@ export default function SettingsScreen() {
                 </View>
 
                 <View className="mb-8">
-                    <Text className="text-lg font-semibold text-slate-700 dark:text-white mb-2">Aspetto</Text>
+                    <Text className="text-lg font-semibold text-slate-700 dark:text-white mb-2">Orario e Tema</Text>
                     <View className="flex-row bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
                         <TouchableOpacity
                             className={`flex-1 items-center py-2 rounded-md ${colorScheme === 'light' ? 'bg-white dark:bg-slate-700' : ''}`}
                             style={colorScheme === 'light' ? { elevation: 2, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 2, shadowOffset: { width: 0, height: 1 } } : undefined}
                             onPress={() => setColorScheme('light')}
                         >
-                            <Text className={`font-medium ${colorScheme === 'light' ? 'text-slate-800 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}>Chiaro</Text>
+                            <Text className={`font-medium ${colorScheme === 'light' ? 'text-slate-800 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}>Giorno</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             className={`flex-1 items-center py-2 rounded-md ${colorScheme === 'dark' ? 'bg-white dark:bg-slate-700' : ''}`}
                             style={colorScheme === 'dark' ? { elevation: 2, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 2, shadowOffset: { width: 0, height: 1 } } : undefined}
                             onPress={() => setColorScheme('dark')}
                         >
-                            <Text className={`font-medium ${colorScheme === 'dark' ? 'text-slate-800 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}>Scuro</Text>
+                            <Text className={`font-medium ${colorScheme === 'dark' ? 'text-slate-800 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}>Notte</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -109,12 +127,20 @@ export default function SettingsScreen() {
                 </View>
 
                 <View className="border-t border-slate-200 dark:border-slate-800 pt-8 mt-auto mb-12">
-                    <Text className="text-lg font-semibold text-red-600 dark:text-red-500 mb-4">Zona Pericolo</Text>
+                    <Text className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-4">Gestione Dati</Text>
+                    
+                    <TouchableOpacity
+                        className="bg-orange-50 dark:bg-orange-900/30 border border-orange-200 dark:border-orange-800 p-4 rounded-lg items-center mb-3"
+                        onPress={handleResetTips}
+                    >
+                        <Text className="text-orange-600 dark:text-orange-500 font-bold">Azzera solo Completamento Attività</Text>
+                    </TouchableOpacity>
+
                     <TouchableOpacity
                         className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-900 p-4 rounded-lg items-center"
                         onPress={handleReset}
                     >
-                        <Text className="text-red-600 dark:text-red-500 font-bold">Reset Progressi</Text>
+                        <Text className="text-red-600 dark:text-red-500 font-bold">Reset Completo App (Badge Inclusi)</Text>
                     </TouchableOpacity>
                 </View>
 

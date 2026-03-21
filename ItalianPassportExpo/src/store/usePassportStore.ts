@@ -7,9 +7,11 @@ interface PassportState {
     scratchedPlaceIds: string[];
     gpsThreshold: number; // in meters
     theme: 'light' | 'dark';
+    completedTips: Record<string, boolean>;
 
     unlockPlace: (placeId: string) => void;
     markPlaceAsScratched: (placeId: string) => void;
+    toggleTip: (placeId: string, isNight: boolean, index: number) => void;
     isPlaceUnlocked: (placeId: string) => boolean;
     setGpsThreshold: (threshold: number) => void;
     setTheme: (theme: 'light' | 'dark') => void;
@@ -24,6 +26,7 @@ export const usePassportStore = create<PassportState>()(
             scratchedPlaceIds: [],
             gpsThreshold: 200,
             theme: 'light',
+            completedTips: {},
 
             unlockPlace: (placeId: string) => {
                 const { visitedPlaceIds } = get();
@@ -39,6 +42,17 @@ export const usePassportStore = create<PassportState>()(
                 }
             },
 
+            toggleTip: (placeId: string, isNight: boolean, index: number) => {
+                const { completedTips } = get();
+                const tipKey = `${placeId}-${isNight ? 'night' : 'day'}-${index}`;
+                set({
+                    completedTips: {
+                        ...completedTips,
+                        [tipKey]: !completedTips[tipKey]
+                    }
+                });
+            },
+
             isPlaceUnlocked: (placeId: string) => {
                 return get().visitedPlaceIds.includes(placeId);
             },
@@ -52,7 +66,7 @@ export const usePassportStore = create<PassportState>()(
             },
 
             resetProgress: () => {
-                set({ visitedPlaceIds: [], scratchedPlaceIds: [] });
+                set({ visitedPlaceIds: [], scratchedPlaceIds: [], completedTips: {} });
             },
 
             resetScratchedStatus: () => {

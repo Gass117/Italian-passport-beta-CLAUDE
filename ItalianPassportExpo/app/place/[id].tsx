@@ -5,7 +5,8 @@ import { PLACES_DATA } from '@/src/data/places';
 import { useLocationCheck } from '@/src/hooks/useLocationCheck';
 import { usePassportStore } from '@/src/store/usePassportStore';
 import ScratchCard from '@/src/components/ScratchCard';
-import { LucideMapPin, LucideUnlock } from 'lucide-react-native';
+import { LucideMapPin, LucideUnlock, LucideCircle, LucideCheckCircle2, LucideSun, LucideMoon } from 'lucide-react-native';
+import { useColorScheme } from 'nativewind';
 
 export default function PlaceScreen() {
     const { id } = useLocalSearchParams();
@@ -24,6 +25,12 @@ export default function PlaceScreen() {
     const unlockPlace = usePassportStore((state) => state.unlockPlace);
     const scratchedPlaceIds = usePassportStore((state) => state.scratchedPlaceIds);
     const gpsThreshold = usePassportStore((state) => state.gpsThreshold);
+    const completedTips = usePassportStore((state) => state.completedTips);
+    const toggleTip = usePassportStore((state) => state.toggleTip);
+    
+    const { colorScheme, setColorScheme } = useColorScheme();
+    const isNight = colorScheme === 'dark';
+    const currentTips = isNight && place?.nightTips ? place.nightTips : (place?.docTips || []);
 
     const handleReveal = () => {
         if (place) {
@@ -158,15 +165,56 @@ export default function PlaceScreen() {
                 </View>
 
                 {/* Tips Section */}
-                <Text className="text-xl font-bold text-slate-800 dark:text-white mb-4">5 Cose da fare</Text>
-                {place.docTips.map((tip, index) => (
-                    <View key={index} className="flex-row items-start mb-3 bg-slate-50 dark:bg-slate-900 p-3 rounded-lg border border-slate-100 dark:border-slate-700">
-                        <View className="bg-green-100 dark:bg-green-950 w-6 h-6 rounded-full items-center justify-center mr-3 mt-0.5">
-                            <Text className="text-green-700 dark:text-green-500 font-bold text-xs">{index + 1}</Text>
-                        </View>
-                        <Text className="text-slate-600 dark:text-slate-300 flex-1 leading-6">{tip}</Text>
-                    </View>
-                ))}
+                <View className="flex-row justify-between items-center mb-4">
+                    <Text className="text-xl font-bold text-slate-800 dark:text-white">
+                        5 Cose da fare {isNight ? 'di sera' : 'di giorno'}
+                    </Text>
+                    
+                    {/* Inline Theme Toggle */}
+                    <TouchableOpacity 
+                        onPress={() => setColorScheme(isNight ? 'light' : 'dark')}
+                        className="flex-row items-center bg-slate-200/50 dark:bg-slate-700/50 px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-700"
+                    >
+                        {isNight ? (
+                            <LucideMoon size={16} color="#fbbf24" className="mr-1" />
+                        ) : (
+                            <LucideSun size={16} color="#f59e0b" className="mr-1" />
+                        )}
+                        <Text className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                            {isNight ? 'Notte' : 'Giorno'}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+                {currentTips.map((tip, index) => {
+                    const isCompleted = completedTips[`${place.id}-${isNight ? 'night' : 'day'}-${index}`];
+                    return (
+                        <TouchableOpacity
+                            key={index}
+                            onPress={() => toggleTip(place.id, isNight, index)}
+                            activeOpacity={0.7}
+                            className={`flex-row items-start mb-3 p-3 rounded-lg border ${
+                                isCompleted 
+                                  ? 'bg-green-50 dark:bg-green-900/40 border-green-200 dark:border-green-800' 
+                                  : 'bg-slate-50 dark:bg-slate-900 border-slate-100 dark:border-slate-700'
+                            }`}
+                        >
+                            <View className="mr-3 mt-0.5">
+                                {isCompleted ? (
+                                    <LucideCheckCircle2 size={24} color="#22c55e" />
+                                ) : (
+                                    <LucideCircle size={24} color="#94a3b8" />
+                                )}
+                            </View>
+                            <Text className={`flex-1 leading-6 ${
+                                isCompleted 
+                                  ? 'text-slate-500 dark:text-slate-400 line-through' 
+                                  : 'text-slate-600 dark:text-slate-300'
+                            }`}>
+                                {tip}
+                            </Text>
+                        </TouchableOpacity>
+                    );
+                })}
 
             </View>
         </ScrollView>
