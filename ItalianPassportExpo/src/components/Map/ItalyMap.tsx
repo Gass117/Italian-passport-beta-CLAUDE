@@ -12,6 +12,9 @@ import ProgressCircle from '@/src/components/ProgressCircle';
 
 interface ItalyMapProps {
     onRegionPress?: (regionId: string) => void;
+    selectionMode?: boolean;
+    selectedRegions?: string[];
+    onRegionSelectToggle?: (regionId: string) => void;
 }
 
 type ViewMode = 'ALL' | 'NORTH' | 'CENTER' | 'SOUTH';
@@ -56,10 +59,16 @@ export const getMacroRegion = (regionId: string): ViewMode => {
     return MACRO_REGIONS[regionId] || 'ALL';
 };
 
-export default function ItalyMap({ onRegionPress }: ItalyMapProps) {
+export default function ItalyMap({ 
+    onRegionPress, 
+    selectionMode = false, 
+    selectedRegions = [], 
+    onRegionSelectToggle 
+}: ItalyMapProps) {
     const router = useRouter();
     const { visitedPlaceIds } = usePassportStore();
     const { colorScheme } = useColorScheme();
+    const isDark = colorScheme === 'dark';
     const [viewMode, setViewMode] = useState<ViewMode>('ALL');
 
     const mapOpacity = useSharedValue(1);
@@ -69,6 +78,11 @@ export default function ItalyMap({ onRegionPress }: ItalyMapProps) {
     });
 
     const handlePress = (regionId: string) => {
+        if (selectionMode && onRegionSelectToggle) {
+            onRegionSelectToggle(regionId);
+            return;
+        }
+
         if (viewMode === 'ALL') {
             const targetMode = getMacroRegion(regionId);
             if (targetMode !== 'ALL') {
@@ -130,7 +144,7 @@ export default function ItalyMap({ onRegionPress }: ItalyMapProps) {
                 ]}
             >
                 {/* Global Progress Circle inside the white map box */}
-                {viewMode === 'ALL' && (
+                {!selectionMode && viewMode === 'ALL' && (
                     <TouchableOpacity 
                         className="absolute top-4 right-4 z-20"
                         onPress={() => router.push('/collection')}
@@ -172,7 +186,13 @@ export default function ItalyMap({ onRegionPress }: ItalyMapProps) {
                     {/* 2. MAIN REGION LAYER */}
                     {Object.entries(REGION_PATHS).map(([id, pathData]) => {
                         const region = PLACES_DATA.regions.find((r) => r.id === id);
-                        const color = region ? region.themeColorHex : "#E2E8F0";
+                        let color = region ? region.themeColorHex : "#E2E8F0";
+                        
+                        if (selectionMode) {
+                            const isSelected = selectedRegions.includes(id);
+                            color = isSelected ? (region?.themeColorHex || '#fbbf24') : (isDark ? '#334155' : '#e2e8f0');
+                        }
+
                         const regionMode = getMacroRegion(id);
 
                         if (viewMode !== 'ALL' && regionMode !== viewMode) {
@@ -203,7 +223,7 @@ export default function ItalyMap({ onRegionPress }: ItalyMapProps) {
                 </Svg>
 
                 {/* Interaction Hint (Moved Inside White Box) */}
-                {viewMode === 'ALL' && (
+                {!selectionMode && viewMode === 'ALL' && (
                     <View className="absolute bottom-4 left-0 right-0 items-center pointer-events-none">
                         <Text className="text-slate-400 dark:text-slate-500 text-xs text-center px-4 py-1 rounded-full mx-auto font-medium">
                             Tocca una zona per esplorare

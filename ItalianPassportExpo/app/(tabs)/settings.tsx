@@ -10,6 +10,7 @@ export default function SettingsScreen() {
     const gpsThreshold = usePassportStore((state) => state.gpsThreshold);
     const setGpsThreshold = usePassportStore((state) => state.setGpsThreshold);
     const resetProgress = usePassportStore((state) => state.resetProgress);
+    const resetOnboarding = usePassportStore((state) => state.resetOnboarding);
 
     const [thresholdInput, setThresholdInput] = useState(gpsThreshold.toString());
 
@@ -58,6 +59,25 @@ export default function SettingsScreen() {
                     onPress: () => {
                         usePassportStore.setState({ completedTips: {} });
                         Alert.alert("Fatto", "Tutte le attività sono state ripristinate.");
+                    }
+                }
+            ]
+        );
+    };
+
+    const handleResetOnboarding = () => {
+        Alert.alert(
+            "Sviluppatore",
+            "Vuoi riavviare l'Onboarding iniziale rimuovendo le regioni gratuite scelte?",
+            [
+                { text: "Annulla", style: "cancel" },
+                {
+                    text: "Riavvia Onboarding",
+                    style: "destructive",
+                    onPress: () => {
+                        resetOnboarding();
+                        // Forza il refresh ricaricando l'app o facendola triggerare dal layout root
+                        router.replace('/');
                     }
                 }
             ]
@@ -129,6 +149,13 @@ export default function SettingsScreen() {
                 <View className="border-t border-slate-200 dark:border-slate-800 pt-8 mt-auto mb-12">
                     <Text className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-4">Gestione Dati</Text>
                     
+                    <TouchableOpacity
+                        className="bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-800 p-4 rounded-lg items-center mb-3"
+                        onPress={handleResetOnboarding}
+                    >
+                        <Text className="text-purple-600 dark:text-purple-400 font-bold">Riavvia Onboarding (Test)</Text>
+                    </TouchableOpacity>
+
                     <TouchableOpacity
                         className="bg-orange-50 dark:bg-orange-900/30 border border-orange-200 dark:border-orange-800 p-4 rounded-lg items-center mb-3"
                         onPress={handleResetTips}

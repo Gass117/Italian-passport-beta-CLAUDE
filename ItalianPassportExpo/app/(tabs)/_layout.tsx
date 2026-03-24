@@ -1,10 +1,16 @@
-import { Tabs } from 'expo-router';
+import { Tabs, Redirect } from 'expo-router';
 import React from 'react';
 import { useColorScheme } from 'nativewind';
 import { LucideMap, LucideLayoutGrid, LucideSettings, LucideSearch, LucideStar } from 'lucide-react-native';
+import { usePassportStore } from '@/src/store/usePassportStore';
 
 export default function TabLayout() {
+  const hasCompletedOnboarding = usePassportStore((state) => state.hasCompletedOnboarding);
   const { colorScheme } = useColorScheme();
+
+  if (!hasCompletedOnboarding) {
+    return <Redirect href="/onboarding/welcome" />;
+  }
 
   return (
     <Tabs

@@ -9,6 +9,8 @@ interface PassportState {
     theme: 'light' | 'dark';
     completedTips: Record<string, boolean>;
     favoritePlaceIds: string[];
+    hasCompletedOnboarding: boolean;
+    unlockedRegions: string[];
 
     unlockPlace: (placeId: string) => void;
     markPlaceAsScratched: (placeId: string) => void;
@@ -17,8 +19,13 @@ interface PassportState {
     isPlaceUnlocked: (placeId: string) => boolean;
     setGpsThreshold: (threshold: number) => void;
     setTheme: (theme: 'light' | 'dark') => void;
+    
+    completeOnboarding: () => void;
+    setUnlockedRegions: (regions: string[]) => void;
+
     resetProgress: () => void;
     resetScratchedStatus: () => void;
+    resetOnboarding: () => void;
 }
 
 export const usePassportStore = create<PassportState>()(
@@ -30,6 +37,8 @@ export const usePassportStore = create<PassportState>()(
             theme: 'light',
             completedTips: {},
             favoritePlaceIds: [],
+            hasCompletedOnboarding: false,
+            unlockedRegions: [],
 
             unlockPlace: (placeId: string) => {
                 const { visitedPlaceIds } = get();
@@ -77,12 +86,24 @@ export const usePassportStore = create<PassportState>()(
                 set({ theme });
             },
 
+            completeOnboarding: () => {
+                set({ hasCompletedOnboarding: true });
+            },
+
+            setUnlockedRegions: (regions: string[]) => {
+                set({ unlockedRegions: regions });
+            },
+
             resetProgress: () => {
                 set({ visitedPlaceIds: [], scratchedPlaceIds: [], completedTips: {} });
             },
 
             resetScratchedStatus: () => {
                 set({ scratchedPlaceIds: [] });
+            },
+
+            resetOnboarding: () => {
+                set({ hasCompletedOnboarding: false, unlockedRegions: [] });
             },
         }),
         {
