@@ -5,7 +5,7 @@ import { PLACES_DATA } from '@/src/data/places';
 import { useLocationCheck } from '@/src/hooks/useLocationCheck';
 import { usePassportStore } from '@/src/store/usePassportStore';
 import ScratchCard from '@/src/components/ScratchCard';
-import { LucideMapPin, LucideUnlock, LucideCircle, LucideCheckCircle2, LucideSun, LucideMoon } from 'lucide-react-native';
+import { LucideMapPin, LucideUnlock, LucideCircle, LucideCheckCircle2, LucideSun, LucideMoon, LucideStar } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 
 export default function PlaceScreen() {
@@ -24,6 +24,10 @@ export default function PlaceScreen() {
     const markPlaceAsScratched = usePassportStore((state) => state.markPlaceAsScratched);
     const unlockPlace = usePassportStore((state) => state.unlockPlace);
     const scratchedPlaceIds = usePassportStore((state) => state.scratchedPlaceIds);
+    const favoritePlaceIds = usePassportStore((state) => state.favoritePlaceIds);
+    const toggleFavorite = usePassportStore((state) => state.toggleFavorite);
+    
+    const isFavorite = favoritePlaceIds.includes(place?.id || "");
     const gpsThreshold = usePassportStore((state) => state.gpsThreshold);
     const completedTips = usePassportStore((state) => state.completedTips);
     const toggleTip = usePassportStore((state) => state.toggleTip);
@@ -60,7 +64,26 @@ export default function PlaceScreen() {
 
     return (
         <ScrollView className="flex-1 bg-white dark:bg-slate-900" contentContainerStyle={{ paddingBottom: 40 }}>
-            <Stack.Screen options={{ title: place.name }} />
+            <Stack.Screen 
+                options={{ 
+                    title: place.name,
+                    // @ts-ignore - headerBackTitleVisible is valid in React Navigation but missing in Expo Router types
+                    headerBackTitleVisible: false,
+                    headerBackTitle: '',
+                    headerRight: () => (
+                        <TouchableOpacity 
+                            onPress={() => toggleFavorite(place.id)}
+                            className="mr-2 p-1"
+                        >
+                            <LucideStar 
+                                size={24} 
+                                color={isFavorite ? '#fbbf24' : (isNight ? '#cbd5e1' : '#64748b')} 
+                                fill={isFavorite ? '#fbbf24' : 'transparent'} 
+                            />
+                        </TouchableOpacity>
+                    )
+                }} 
+            />
 
             {/* Header */}
             <View className="p-6 bg-green-50 dark:bg-green-950">

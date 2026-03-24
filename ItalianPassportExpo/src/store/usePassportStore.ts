@@ -8,10 +8,12 @@ interface PassportState {
     gpsThreshold: number; // in meters
     theme: 'light' | 'dark';
     completedTips: Record<string, boolean>;
+    favoritePlaceIds: string[];
 
     unlockPlace: (placeId: string) => void;
     markPlaceAsScratched: (placeId: string) => void;
     toggleTip: (placeId: string, isNight: boolean, index: number) => void;
+    toggleFavorite: (placeId: string) => void;
     isPlaceUnlocked: (placeId: string) => boolean;
     setGpsThreshold: (threshold: number) => void;
     setTheme: (theme: 'light' | 'dark') => void;
@@ -27,6 +29,7 @@ export const usePassportStore = create<PassportState>()(
             gpsThreshold: 200,
             theme: 'light',
             completedTips: {},
+            favoritePlaceIds: [],
 
             unlockPlace: (placeId: string) => {
                 const { visitedPlaceIds } = get();
@@ -51,6 +54,15 @@ export const usePassportStore = create<PassportState>()(
                         [tipKey]: !completedTips[tipKey]
                     }
                 });
+            },
+
+            toggleFavorite: (placeId: string) => {
+                const { favoritePlaceIds } = get();
+                if (favoritePlaceIds.includes(placeId)) {
+                    set({ favoritePlaceIds: favoritePlaceIds.filter(id => id !== placeId) });
+                } else {
+                    set({ favoritePlaceIds: [...favoritePlaceIds, placeId] });
+                }
             },
 
             isPlaceUnlocked: (placeId: string) => {

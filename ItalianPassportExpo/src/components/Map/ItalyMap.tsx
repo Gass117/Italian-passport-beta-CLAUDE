@@ -131,9 +131,12 @@ export default function ItalyMap({ onRegionPress }: ItalyMapProps) {
             >
                 {/* Global Progress Circle inside the white map box */}
                 {viewMode === 'ALL' && (
-                    <View className="absolute top-4 right-4 z-20 pointer-events-none">
+                    <TouchableOpacity 
+                        className="absolute top-4 right-4 z-20"
+                        onPress={() => router.push('/collection')}
+                    >
                         <ProgressCircle size={44} strokeWidth={4} />
-                    </View>
+                    </TouchableOpacity>
                 )}
 
                 <Svg

@@ -149,7 +149,7 @@ export default function ScratchCard({
                             <LinearGradient
                                 start={vec(0, 0)}
                                 end={vec(canvasSize.width, canvasSize.height)}
-                                colors={['#9ca3af', '#f3f4f6', '#9ca3af', '#d1d5db', '#6b7280']}
+                                colors={['#bf953f', '#fcf6ba', '#b38728', '#fbf5b7', '#aa771c']}
                                 positions={[0, 0.25, 0.5, 0.75, 1]}
                             />
                         </Rect>
@@ -169,14 +169,22 @@ export default function ScratchCard({
                     </Group>
                 </Canvas>
                 {scratchProgress === 0 && (
-                    <View style={StyleSheet.absoluteFill} pointerEvents="none" className="items-center justify-center">
+                    <View style={StyleSheet.absoluteFill} pointerEvents="none" className="items-center justify-center px-6">
                         <Animated.Text 
                             style={[
-                                { fontSize: 48, fontWeight: '900', color: 'rgba(255,255,255,0.95)', letterSpacing: 8, textShadowColor: 'rgba(0,0,0,0.4)', textShadowOffset: { width: 0, height: 4 }, textShadowRadius: 8 },
+                                { fontSize: 48, fontWeight: '900', color: 'rgba(255,255,255,0.95)', letterSpacing: 8, textShadowColor: 'rgba(0,0,0,0.4)', textShadowOffset: { width: 0, height: 4 }, textShadowRadius: 8, textAlign: 'center' },
                                 animatedTextStyle
                             ]}
                         >
                             GRATTA
+                        </Animated.Text>
+                        <Animated.Text 
+                            style={[
+                                { fontSize: 16, fontWeight: '800', color: 'rgba(255,255,255,0.95)', textShadowColor: 'rgba(0,0,0,0.4)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4, textAlign: 'center', marginTop: 12 },
+                                animatedTextStyle
+                            ]}
+                        >
+                            e colleziona il badge di questa città
                         </Animated.Text>
                     </View>
                 )}

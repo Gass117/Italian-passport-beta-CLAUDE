@@ -1,7 +1,7 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { useColorScheme } from 'nativewind';
-import { LucideMap, LucideLayoutGrid, LucideSettings } from 'lucide-react-native';
+import { LucideMap, LucideLayoutGrid, LucideSettings, LucideSearch, LucideStar } from 'lucide-react-native';
 
 export default function TabLayout() {
   const { colorScheme } = useColorScheme();
@@ -30,6 +30,21 @@ export default function TabLayout() {
         options={{
           title: 'Collezione',
           tabBarIcon: ({ color }) => <LucideLayoutGrid color={color} />,
+          href: null, // Hide from bottom navigation bar
+        }}
+      />
+      <Tabs.Screen
+        name="search"
+        options={{
+          title: 'Cerca',
+          tabBarIcon: ({ color }) => <LucideSearch color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="favorites"
+        options={{
+          title: 'Preferiti',
+          tabBarIcon: ({ color }) => <LucideStar color={color} />,
         }}
       />
       <Tabs.Screen
