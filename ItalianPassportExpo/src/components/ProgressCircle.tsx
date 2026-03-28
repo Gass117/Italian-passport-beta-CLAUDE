@@ -27,8 +27,8 @@ export default function ProgressCircle({ size = 48, strokeWidth = 5 }: ProgressC
     const { colorScheme } = useColorScheme();
     const isDark = colorScheme === 'dark';
 
-    // The circle track colors (slate-200 for light, slate-800 for dark)
-    const trackColor = isDark ? '#1e293b' : '#e2e8f0';
+    // The circle track colors (slate-200 for light, slate-700 for dark)
+    const trackColor = isDark ? '#334155' : '#e2e8f0';
     // The active fill color (emerald-500)
     const fillColor = '#10b981';
 
@@ -60,7 +60,7 @@ export default function ProgressCircle({ size = 48, strokeWidth = 5 }: ProgressC
             </Svg>
             
             {/* Percentage Text inside the circle */}
-            <Text className="text-[11px] font-black text-slate-700 dark:text-slate-300">
+            <Text className="text-[11px] font-black text-slate-700 dark:text-white">
                 {percent}%
             </Text>
         </View>

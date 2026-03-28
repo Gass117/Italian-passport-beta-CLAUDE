@@ -6,11 +6,17 @@ import ItalyMap from '@/src/components/Map/ItalyMap';
 import { Stack } from 'expo-router';
 import ThemeToggle from '@/src/components/ThemeToggle';
 import CurrentLocation from '@/src/components/CurrentLocation';
+import { TwinklingBackground, ShootingStarsOverlay } from '@/src/components/StarryBackground';
+import { useColorScheme } from 'nativewind';
 
 export default function MapScreen() {
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === 'dark';
+
   return (
-    <SafeAreaView className="flex-1 bg-white dark:bg-slate-900" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-white dark:bg-black" edges={['top']}>
       <Stack.Screen options={{ headerShown: false }} />
+      {isDark && <TwinklingBackground />}
       <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
           <View className="w-full justify-center items-center px-6 mt-6 mb-2 z-10 relative">
             <ThemeToggle />
@@ -31,10 +37,10 @@ export default function MapScreen() {
               <ItalyMap />
             </View>
 
-            {/* GPS Location Display */}
             <CurrentLocation />
           </View>
       </ScrollView>
+      {isDark && <ShootingStarsOverlay />}
     </SafeAreaView>
   );
 }

@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 interface PassportState {
     visitedPlaceIds: string[];
     scratchedPlaceIds: string[];
+    scratchedPlaceDates: Record<string, string>; // Maps placeId -> "15 maggio 2026"
     gpsThreshold: number; // in meters
     theme: 'light' | 'dark';
     completedTips: Record<string, boolean>;
@@ -33,6 +34,7 @@ export const usePassportStore = create<PassportState>()(
         (set, get) => ({
             visitedPlaceIds: [],
             scratchedPlaceIds: [],
+            scratchedPlaceDates: {},
             gpsThreshold: 200,
             theme: 'light',
             completedTips: {},
@@ -48,9 +50,20 @@ export const usePassportStore = create<PassportState>()(
             },
 
             markPlaceAsScratched: (placeId: string) => {
-                const { scratchedPlaceIds } = get();
+                const { scratchedPlaceIds, scratchedPlaceDates } = get();
                 if (!scratchedPlaceIds.includes(placeId)) {
-                    set({ scratchedPlaceIds: [...scratchedPlaceIds, placeId] });
+                    const formatter = new Intl.DateTimeFormat('it-IT', { 
+                        day: 'numeric', month: 'long', year: 'numeric' 
+                    });
+                    const today = formatter.format(new Date());
+
+                    set({ 
+                        scratchedPlaceIds: [...scratchedPlaceIds, placeId],
+                        scratchedPlaceDates: {
+                            ...(scratchedPlaceDates || {}),
+                            [placeId]: today
+                        }
+                    });
                 }
             },
 
@@ -95,7 +108,7 @@ export const usePassportStore = create<PassportState>()(
             },
 
             resetProgress: () => {
-                set({ visitedPlaceIds: [], scratchedPlaceIds: [], completedTips: {} });
+                set({ visitedPlaceIds: [], scratchedPlaceIds: [], completedTips: {}, scratchedPlaceDates: {} });
             },
 
             resetScratchedStatus: () => {

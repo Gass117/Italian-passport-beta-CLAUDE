@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TouchableOpacity, Text, LayoutAnimation } from 'react-native';
+import { View, TouchableOpacity, Text, LayoutAnimation, Alert } from 'react-native';
 import Svg, { Path, G } from 'react-native-svg';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS } from 'react-native-reanimated';
 import { REGION_PATHS } from './RegionPaths';
@@ -66,7 +66,7 @@ export default function ItalyMap({
     onRegionSelectToggle 
 }: ItalyMapProps) {
     const router = useRouter();
-    const { visitedPlaceIds } = usePassportStore();
+    const { visitedPlaceIds, unlockedRegions } = usePassportStore();
     const { colorScheme } = useColorScheme();
     const isDark = colorScheme === 'dark';
     const [viewMode, setViewMode] = useState<ViewMode>('ALL');
@@ -78,8 +78,25 @@ export default function ItalyMap({
     });
 
     const handlePress = (regionId: string) => {
-        if (selectionMode && onRegionSelectToggle) {
-            onRegionSelectToggle(regionId);
+        if (selectionMode) {
+            if (onRegionSelectToggle) {
+                onRegionSelectToggle(regionId);
+            } else if (onRegionPress) {
+                onRegionPress(regionId);
+            }
+            return;
+        }
+
+        // Lock check logic for Home screen
+        if (!selectionMode && !unlockedRegions.includes(regionId)) {
+            Alert.alert(
+                "Espandi il Passaporto ✈️",
+                "Questa regione è attualmente bloccata. In futuro potrai sbloccarne tutti i monumenti e le sfide acquistandola nello store per 4,99€.",
+                [
+                    { text: "Forse più tardi", style: "cancel" },
+                    { text: "Negozio (In Arrivo)", style: "default" }
+                ]
+            );
             return;
         }
 
@@ -187,10 +204,18 @@ export default function ItalyMap({
                     {Object.entries(REGION_PATHS).map(([id, pathData]) => {
                         const region = PLACES_DATA.regions.find((r) => r.id === id);
                         let color = region ? region.themeColorHex : "#E2E8F0";
+                        const isUnlocked = unlockedRegions.includes(id);
+                        let pathOpacity = 1;
                         
                         if (selectionMode) {
                             const isSelected = selectedRegions.includes(id);
                             color = isSelected ? (region?.themeColorHex || '#fbbf24') : (isDark ? '#334155' : '#e2e8f0');
+                        } else {
+                            if (!isUnlocked) {
+                                // Solid neutral color (no tint) and solid opacity for locked regions so the map looks clean.
+                                color = isDark ? '#334155' : '#cbd5e1'; 
+                                pathOpacity = 1; 
+                            }
                         }
 
                         const regionMode = getMacroRegion(id);
@@ -212,6 +237,7 @@ export default function ItalyMap({
                                 <Path
                                     d={pathData}
                                     fill={color}
+                                    fillOpacity={pathOpacity}
                                     stroke={colorScheme === 'dark' ? '#1e293b' : 'white'}
                                     // Strong Sticker outline for ALL states
                                     strokeWidth={viewMode === 'ALL' ? "2.5" : "3.5"}

@@ -15,16 +15,17 @@ const IMAGES = [
 ];
 
 const CrossFadeImage = ({ uri, isActive }: { uri: string; isActive: boolean }) => {
+    // If it's active on mount, set opacity to 1 immediately so it appears the millisecond the OS finishes downloading it.
     const opacity = useSharedValue(isActive ? 1 : 0);
-    const [isLoaded, setIsLoaded] = useState(false);
 
     useEffect(() => {
-        if (isActive && isLoaded) {
+        // Only trigger timing animations for subsequent transitions.
+        if (isActive) {
             opacity.value = withTiming(1, { duration: 1000 });
-        } else if (!isActive) {
+        } else {
             opacity.value = withTiming(0, { duration: 2500 });
         }
-    }, [isActive, isLoaded]);
+    }, [isActive]);
 
     const animatedStyle = useAnimatedStyle(() => ({
         opacity: opacity.value,
@@ -33,7 +34,6 @@ const CrossFadeImage = ({ uri, isActive }: { uri: string; isActive: boolean }) =
     return (
         <Animated.Image 
             source={{ uri }}
-            onLoad={() => setIsLoaded(true)}
             style={[{ position: 'absolute', width: '100%', height: '100%' }, animatedStyle]}
             resizeMode="cover"
         />
@@ -101,7 +101,8 @@ export default function WelcomeScreen() {
                     <Animated.View entering={FadeInDown.delay(1000).duration(800)}>
                         <TouchableOpacity
                             activeOpacity={0.8}
-                            onPress={() => router.push('/onboarding/region-selection')}
+                            // @ts-ignore
+                            onPress={() => router.push('/onboarding/city-selection')}
                             className="w-full py-4 rounded-full bg-white shadow-xl flex-row justify-center items-center active:bg-slate-200"
                             style={{
                                 shadowColor: '#000',

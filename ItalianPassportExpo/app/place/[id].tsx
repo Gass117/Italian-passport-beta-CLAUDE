@@ -1,10 +1,12 @@
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, Alert, TouchableOpacity, Image } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator, Alert, TouchableOpacity, Image, LayoutAnimation } from 'react-native';
+import Animated, { LinearTransition, FadeIn } from 'react-native-reanimated';
 import { PLACES_DATA } from '@/src/data/places';
 import { useLocationCheck } from '@/src/hooks/useLocationCheck';
 import { usePassportStore } from '@/src/store/usePassportStore';
 import ScratchCard from '@/src/components/ScratchCard';
+import FlippableBadge from '@/src/components/FlippableBadge';
 import { LucideMapPin, LucideUnlock, LucideCircle, LucideCheckCircle2, LucideSun, LucideMoon, LucideStar } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 
@@ -24,6 +26,7 @@ export default function PlaceScreen() {
     const markPlaceAsScratched = usePassportStore((state) => state.markPlaceAsScratched);
     const unlockPlace = usePassportStore((state) => state.unlockPlace);
     const scratchedPlaceIds = usePassportStore((state) => state.scratchedPlaceIds);
+    const scratchedPlaceDates = usePassportStore((state) => state.scratchedPlaceDates);
     const favoritePlaceIds = usePassportStore((state) => state.favoritePlaceIds);
     const toggleFavorite = usePassportStore((state) => state.toggleFavorite);
     
@@ -73,10 +76,11 @@ export default function PlaceScreen() {
                     headerRight: () => (
                         <TouchableOpacity 
                             onPress={() => toggleFavorite(place.id)}
-                            className="mr-2 p-1"
+                            className="w-10 h-10 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800"
+                            style={{ marginRight: -5 }} // Shift 5 points to the right
                         >
                             <LucideStar 
-                                size={24} 
+                                size={22} 
                                 color={isFavorite ? '#fbbf24' : (isNight ? '#cbd5e1' : '#64748b')} 
                                 fill={isFavorite ? '#fbbf24' : 'transparent'} 
                             />
@@ -105,38 +109,25 @@ export default function PlaceScreen() {
                     */}
                     {scratchedPlaceIds.includes(place.id) ? (
                         <View className="items-center justify-center p-4">
-                            <View style={{
-                                width: 280,
-                                height: 280,
-                                borderRadius: 140,
-                                backgroundColor: 'white',
-                                shadowColor: "#000",
-                                shadowOffset: { width: 0, height: 10 },
-                                shadowOpacity: 0.5,
-                                shadowRadius: 12,
-                                elevation: 15,
-                            }}>
-                                <View style={{
-                                    width: '100%',
-                                    height: '100%',
-                                    borderRadius: 140,
-                                    overflow: 'hidden',
-                                    borderWidth: 8,
-                                    borderColor: 'white',
-                                }}>
-                                    {place.badge.imageAsset ? (
-                                        <Image
-                                            source={place.badge.imageAsset}
-                                            style={{ width: '100%', height: '100%' }}
-                                            resizeMode="cover"
-                                        />
-                                    ) : (
-                                        <View className="flex-1 bg-green-100 items-center justify-center">
-                                            <LucideUnlock size={80} color="#15803d" />
-                                        </View>
-                                    )}
-                                </View>
+                            <View 
+                                style={{
+                                    shadowColor: PLACES_DATA.regions.find(r => r.id === place.regionId)?.themeColorHex || '#fbbf24',
+                                    shadowOpacity: 0.6,
+                                    shadowOffset: { width: 0, height: 10 },
+                                    shadowRadius: 20,
+                                    elevation: 20
+                                }}
+                            >
+                                <FlippableBadge
+                                    size={260} // +20% visually massive!
+                                    themeColorHex={'#fbbf24'} // Using the true gold internal gradient
+                                    imageAsset={place.badge.imageAsset}
+                                    unlockDate={scratchedPlaceDates?.[place.id]}
+                                />
                             </View>
+                            <Text className="text-slate-400 dark:text-slate-500 text-sm mt-4 italic">
+                                Tocca il badge per girarlo!
+                            </Text>
                         </View>
                     ) : (
                         /* 
@@ -195,7 +186,10 @@ export default function PlaceScreen() {
                     
                     {/* Inline Theme Toggle */}
                     <TouchableOpacity 
-                        onPress={() => setColorScheme(isNight ? 'light' : 'dark')}
+                        onPress={() => {
+                            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                            setColorScheme(isNight ? 'light' : 'dark');
+                        }}
                         className="flex-row items-center bg-slate-200/50 dark:bg-slate-700/50 px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-700"
                     >
                         {isNight ? (
@@ -208,36 +202,38 @@ export default function PlaceScreen() {
                         </Text>
                     </TouchableOpacity>
                 </View>
-                {currentTips.map((tip, index) => {
-                    const isCompleted = completedTips[`${place.id}-${isNight ? 'night' : 'day'}-${index}`];
-                    return (
-                        <TouchableOpacity
-                            key={index}
-                            onPress={() => toggleTip(place.id, isNight, index)}
-                            activeOpacity={0.7}
-                            className={`flex-row items-start mb-3 p-3 rounded-lg border ${
-                                isCompleted 
-                                  ? 'bg-green-50 dark:bg-green-900/40 border-green-200 dark:border-green-800' 
-                                  : 'bg-slate-50 dark:bg-slate-900 border-slate-100 dark:border-slate-700'
-                            }`}
-                        >
-                            <View className="mr-3 mt-0.5">
-                                {isCompleted ? (
-                                    <LucideCheckCircle2 size={24} color="#22c55e" />
-                                ) : (
-                                    <LucideCircle size={24} color="#94a3b8" />
-                                )}
-                            </View>
-                            <Text className={`flex-1 leading-6 ${
-                                isCompleted 
-                                  ? 'text-slate-500 dark:text-slate-400 line-through' 
-                                  : 'text-slate-600 dark:text-slate-300'
-                            }`}>
-                                {tip}
-                            </Text>
-                        </TouchableOpacity>
-                    );
-                })}
+                <Animated.View key={isNight ? 'night-tips' : 'day-tips'} entering={FadeIn.duration(400)}>
+                    {currentTips.map((tip, index) => {
+                        const isCompleted = completedTips[`${place.id}-${isNight ? 'night' : 'day'}-${index}`];
+                        return (
+                            <TouchableOpacity
+                                key={index}
+                                onPress={() => toggleTip(place.id, isNight, index)}
+                                activeOpacity={0.7}
+                                className={`flex-row items-start mb-3 p-3 rounded-lg border ${
+                                    isCompleted 
+                                      ? 'bg-green-50 dark:bg-green-900/40 border-green-200 dark:border-green-800' 
+                                      : 'bg-slate-50 dark:bg-slate-900 border-slate-100 dark:border-slate-700'
+                                }`}
+                            >
+                                <View className="mr-3 mt-0.5">
+                                    {isCompleted ? (
+                                        <LucideCheckCircle2 size={24} color="#22c55e" />
+                                    ) : (
+                                        <LucideCircle size={24} color="#94a3b8" />
+                                    )}
+                                </View>
+                                <Text className={`flex-1 leading-6 ${
+                                    isCompleted 
+                                      ? 'text-slate-500 dark:text-slate-400 line-through' 
+                                      : 'text-slate-600 dark:text-slate-300'
+                                }`}>
+                                    {tip}
+                                </Text>
+                            </TouchableOpacity>
+                        );
+                    })}
+                </Animated.View>
 
             </View>
         </ScrollView>
