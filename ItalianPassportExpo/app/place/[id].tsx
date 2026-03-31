@@ -1,12 +1,14 @@
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, Alert, TouchableOpacity, Image, LayoutAnimation } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator, Alert, TouchableOpacity, Image, LayoutAnimation, Modal, Dimensions } from 'react-native';
 import Animated, { LinearTransition, FadeIn } from 'react-native-reanimated';
+import ConfettiCannon from 'react-native-confetti-cannon';
 import { PLACES_DATA } from '@/src/data/places';
 import { useLocationCheck } from '@/src/hooks/useLocationCheck';
 import { usePassportStore } from '@/src/store/usePassportStore';
 import ScratchCard from '@/src/components/ScratchCard';
 import FlippableBadge from '@/src/components/FlippableBadge';
+import TrophyViewer from '@/src/components/TrophyViewer';
 import { LucideMapPin, LucideUnlock, LucideCircle, LucideCheckCircle2, LucideSun, LucideMoon, LucideStar } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 
@@ -38,6 +40,29 @@ export default function PlaceScreen() {
     const { colorScheme, setColorScheme } = useColorScheme();
     const isNight = colorScheme === 'dark';
     const currentTips = isNight && place?.nightTips ? place.nightTips : (place?.docTips || []);
+
+    const currentDayTips = place?.docTips || [];
+    const currentNightTips = place?.nightTips || place?.docTips || [];
+    const isDayCompleted = currentDayTips.every((_, index) => completedTips[`${place?.id}-day-${index}`]);
+    const isNightCompleted = currentNightTips.every((_, index) => completedTips[`${place?.id}-night-${index}`]);
+    const isTrophyUnlocked = currentDayTips.length > 0 && isDayCompleted && isNightCompleted;
+    
+    const [showTrophyModal, setShowTrophyModal] = useState(false);
+    const [showCelebrationModal, setShowCelebrationModal] = useState(false);
+    const [wasUnlockedOnMount] = useState(isTrophyUnlocked);
+
+    useEffect(() => {
+        if (isTrophyUnlocked && !wasUnlockedOnMount) {
+            setShowCelebrationModal(true);
+        }
+    }, [isTrophyUnlocked, wasUnlockedOnMount]);
+
+    const handleCelebrationTap = () => {
+        setShowCelebrationModal(false);
+        setTimeout(() => {
+            setShowTrophyModal(true);
+        }, 500); // Wait for the fade out before sliding the trophy in
+    };
 
     const handleReveal = () => {
         if (place) {
@@ -178,8 +203,21 @@ export default function PlaceScreen() {
                     )}
                 </View>
 
+                {/* Trophy Button moved outside badge box */}
+                {isTrophyUnlocked && (
+                    <TouchableOpacity 
+                        onPress={() => setShowTrophyModal(true)}
+                        className="mb-8 w-full bg-amber-400 dark:bg-amber-500 px-6 py-4 rounded-xl flex-row justify-center items-center shadow-lg"
+                    >
+                        <LucideStar size={24} color="white" className="mr-3" />
+                        <Text className="text-white font-bold text-lg uppercase tracking-wider text-shadow-sm">
+                            Ispeziona Trofeo 3D
+                        </Text>
+                    </TouchableOpacity>
+                )}
+
                 {/* Tips Section */}
-                <View className="flex-row justify-between items-center mb-4">
+                <View className="flex-row justify-between items-center mb-1">
                     <Text className="text-xl font-bold text-slate-800 dark:text-white">
                         5 Cose da fare {isNight ? 'di sera' : 'di giorno'}
                     </Text>
@@ -202,6 +240,13 @@ export default function PlaceScreen() {
                         </Text>
                     </TouchableOpacity>
                 </View>
+                
+                {!isTrophyUnlocked && (
+                    <Text className="text-amber-500/80 dark:text-amber-400/80 text-sm font-medium mb-4 italic">
+                        Completa tutte le attività giorno/notte per sbloccare il Trofeo.
+                    </Text>
+                )}
+
                 <Animated.View key={isNight ? 'night-tips' : 'day-tips'} entering={FadeIn.duration(400)}>
                     {currentTips.map((tip, index) => {
                         const isCompleted = completedTips[`${place.id}-${isNight ? 'night' : 'day'}-${index}`];
@@ -236,6 +281,83 @@ export default function PlaceScreen() {
                 </Animated.View>
 
             </View>
+
+            {/* Celebration Popup (Before Trophy) */}
+            <Modal visible={showCelebrationModal} animationType="fade" transparent={true}>
+                <TouchableOpacity 
+                    activeOpacity={1} 
+                    onPress={handleCelebrationTap}
+                    className="flex-1 bg-black/95 justify-center items-center p-6"
+                >
+                    {/* Left Cannon */}
+                    <ConfettiCannon
+                        count={200}
+                        origin={{x: Dimensions.get('window').width * 0.2, y: -20}} 
+                        fallSpeed={3500}
+                        explosionSpeed={600}
+                        fadeOut={true}
+                        autoStart={true}
+                        colors={['#fbbf24', '#f59e0b', '#d97706', '#ef4444', '#3b82f6', '#22c55e', '#ffffff']}
+                    />
+                    {/* Right Cannon */}
+                    <ConfettiCannon
+                        count={200}
+                        origin={{x: Dimensions.get('window').width * 0.8, y: -20}} 
+                        fallSpeed={4000}
+                        explosionSpeed={500}
+                        fadeOut={true}
+                        autoStart={true}
+                        colors={['#fbbf24', '#f59e0b', '#d97706', '#ef4444', '#3b82f6', '#22c55e', '#ffffff']}
+                    />
+                    
+                    <Animated.View entering={FadeIn.delay(300).springify()}>
+                        <View className="items-center bg-amber-500/20 p-8 rounded-3xl border-2 border-amber-400">
+                            <Text className="text-4xl font-black text-white text-center mb-2 tracking-widest shadow-xl" style={{ textShadowColor: 'black', textShadowRadius: 10, textShadowOffset: {width: 0, height: 2} }}>
+                                GRANDIOSO!
+                            </Text>
+                            <Text className="text-xl font-bold text-amber-200 text-center mb-8 px-2" style={{ textShadowColor: 'black', textShadowRadius: 6, textShadowOffset: {width: 0, height: 1} }}>
+                                Hai sbloccato il trofeo{'\n'}di {place.name}
+                            </Text>
+                            
+                            <View className="bg-white/20 px-6 py-3 rounded-full border border-white/40 shadow-sm mt-4">
+                                <Text className="text-white font-bold text-sm tracking-widest uppercase">
+                                    Tocca lo schermo
+                                </Text>
+                            </View>
+                        </View>
+                    </Animated.View>
+                </TouchableOpacity>
+            </Modal>
+
+            {/* Trophy Viewer Modal */}
+            <Modal visible={showTrophyModal} animationType="slide" transparent={true}>
+                <View className="flex-1 bg-black/90 justify-center items-center">
+                    <View className="w-[90%] h-[75%] bg-slate-900 rounded-3xl overflow-hidden border border-slate-700 items-center pt-8 shadow-2xl">
+                        <Text className="text-xl font-black text-amber-400 mb-2 tracking-widest uppercase">
+                            TROFEO {place.name}
+                        </Text>
+                        <Text className="text-slate-300 text-center px-6 mb-4 text-sm">
+                            Hai completato tutte le 10 sfide (Giorno e Notte) per questa città! Ecco la tua ricompensa animata.
+                        </Text>
+                        
+                        <View className="flex-1 w-full relative bg-black/40">
+                            {/* @ts-ignore - place.badge.trophyAsset will be added externally by user */}
+                            <TrophyViewer trophyAsset={place.badge.trophyAsset} />
+                            
+                            <Text className="absolute bottom-6 w-full text-center text-slate-500 text-xs italic pointer-events-none">
+                                Usa un dito per ruotare, due per trascinare.
+                            </Text>
+                        </View>
+
+                        <TouchableOpacity 
+                            onPress={() => setShowTrophyModal(false)}
+                            className="bg-slate-800 px-10 py-5 w-full border-t border-slate-700 items-center"
+                        >
+                            <Text className="text-white font-bold text-lg uppercase tracking-wider">Chiudi</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
         </ScrollView>
     );
 }
