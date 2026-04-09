@@ -9,6 +9,9 @@ import { usePassportStore } from '@/src/store/usePassportStore';
 import { LucideZoomOut } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import ProgressCircle from '@/src/components/ProgressCircle';
+import { CopilotStep, walkthroughable } from 'react-native-copilot';
+
+const WalkthroughableView = walkthroughable(View);
 
 interface ItalyMapProps {
     onRegionPress?: (regionId: string) => void;
@@ -166,7 +169,11 @@ export default function ItalyMap({
                         className="absolute top-4 right-4 z-20"
                         onPress={() => router.push('/collection')}
                     >
-                        <ProgressCircle size={44} strokeWidth={4} />
+                        <CopilotStep text="Da qui potrai accedere alla collezione di trofei delle città completate e vedere il tuo completamento generale." order={4} name="collection">
+                            <WalkthroughableView>
+                                <ProgressCircle size={44} strokeWidth={4} />
+                            </WalkthroughableView>
+                        </CopilotStep>
                     </TouchableOpacity>
                 )}
 

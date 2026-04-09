@@ -3,6 +3,7 @@ import React from 'react';
 import { useColorScheme } from 'nativewind';
 import { LucideMap, LucideLayoutGrid, LucideSettings, LucideSearch, LucideStar } from 'lucide-react-native';
 import { usePassportStore } from '@/src/store/usePassportStore';
+import { View } from 'react-native';
 
 export default function TabLayout() {
   const hasCompletedOnboarding = usePassportStore((state) => state.hasCompletedOnboarding);
