@@ -2,6 +2,13 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+export interface PointTransaction {
+    id: string;
+    amount: number;
+    reason: string;
+    timestamp: string;
+}
+
 interface PassportState {
     visitedPlaceIds: string[];
     scratchedPlaceIds: string[];
@@ -12,6 +19,18 @@ interface PassportState {
     favoritePlaceIds: string[];
     hasCompletedOnboarding: boolean;
     unlockedRegions: string[];
+    
+    // Gamification
+    totalPoints: number;
+    pointsHistory: PointTransaction[];
+    loginStreak: number;
+    lastLoginDate: string | null;
+    unlockedTrophies: string[];
+    weeklyMissionProgress: number; // Num of activities completed this week
+    monthlyMissionProgress: number; // Num of trophies unlocked this month
+    lastWeeklyResetDate: string | null;
+    lastMonthlyResetDate: string | null;
+    awardedPointKeys: string[]; // Tracks keys of items that already awarded points
 
     unlockPlace: (placeId: string) => void;
     markPlaceAsScratched: (placeId: string) => void;
@@ -27,6 +46,12 @@ interface PassportState {
     resetProgress: () => void;
     resetScratchedStatus: () => void;
     resetOnboarding: () => void;
+
+    // Gamification Actions
+    addPoints: (amount: number, reason: string) => void;
+    processDailyLogin: () => void;
+    unlockTrophy: (placeId: string) => void;
+    triggerSocialShare: () => void;
 }
 
 export const usePassportStore = create<PassportState>()(
@@ -41,6 +66,17 @@ export const usePassportStore = create<PassportState>()(
             favoritePlaceIds: [],
             hasCompletedOnboarding: false,
             unlockedRegions: [],
+            
+            totalPoints: 0,
+            pointsHistory: [],
+            loginStreak: 0,
+            lastLoginDate: null,
+            unlockedTrophies: [],
+            weeklyMissionProgress: 0,
+            monthlyMissionProgress: 0,
+            lastWeeklyResetDate: null,
+            lastMonthlyResetDate: null,
+            awardedPointKeys: [],
 
             unlockPlace: (placeId: string) => {
                 const { visitedPlaceIds } = get();
@@ -50,7 +86,7 @@ export const usePassportStore = create<PassportState>()(
             },
 
             markPlaceAsScratched: (placeId: string) => {
-                const { scratchedPlaceIds, scratchedPlaceDates } = get();
+                const { scratchedPlaceIds, scratchedPlaceDates, addPoints } = get();
                 if (!scratchedPlaceIds.includes(placeId)) {
                     const formatter = new Intl.DateTimeFormat('it-IT', { 
                         day: 'numeric', month: 'long', year: 'numeric' 
@@ -64,18 +100,47 @@ export const usePassportStore = create<PassportState>()(
                             [placeId]: today
                         }
                     });
+
+                    // Add points for scratching
+                    addPoints(50, "Badge grattato");
                 }
             },
 
             toggleTip: (placeId: string, isNight: boolean, index: number) => {
-                const { completedTips } = get();
+                const { completedTips, addPoints, weeklyMissionProgress, lastWeeklyResetDate, awardedPointKeys } = get();
                 const tipKey = `${placeId}-${isNight ? 'night' : 'day'}-${index}`;
+                const isAlreadyCompleted = completedTips[tipKey];
+                
                 set({
                     completedTips: {
                         ...completedTips,
-                        [tipKey]: !completedTips[tipKey]
+                        [tipKey]: !isAlreadyCompleted
                     }
                 });
+
+                // Award points only if it hasn't been awarded before
+                if (!isAlreadyCompleted && !awardedPointKeys.includes(tipKey)) {
+                    set({ awardedPointKeys: [...awardedPointKeys, tipKey] });
+                    addPoints(10, "Attività completata");
+                    
+                    // Update Weekly Mission
+                    const now = new Date();
+                    const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + (now.getDay() === 0 ? -6 : 1))).toISOString().split('T')[0];
+                    
+                    let newProgress = weeklyMissionProgress + 1;
+                    if (lastWeeklyResetDate !== startOfWeek) {
+                        newProgress = 1; // Reset for new week
+                    }
+                    
+                    set({ 
+                        weeklyMissionProgress: newProgress,
+                        lastWeeklyResetDate: startOfWeek
+                    });
+
+                    if (newProgress === 5) {
+                        addPoints(50, "Missione settimanale");
+                    }
+                }
             },
 
             toggleFavorite: (placeId: string) => {
@@ -104,11 +169,33 @@ export const usePassportStore = create<PassportState>()(
             },
 
             setUnlockedRegions: (regions: string[]) => {
+                const currentRegions = get().unlockedRegions;
+                const newRegions = regions.filter(r => !currentRegions.includes(r));
+                
                 set({ unlockedRegions: regions });
+
+                if (newRegions.length > 0) {
+                    get().addPoints(30 * newRegions.length, "Regione sbloccata");
+                }
             },
 
             resetProgress: () => {
-                set({ visitedPlaceIds: [], scratchedPlaceIds: [], completedTips: {}, scratchedPlaceDates: {} });
+                set({ 
+                    visitedPlaceIds: [], 
+                    scratchedPlaceIds: [], 
+                    completedTips: {}, 
+                    scratchedPlaceDates: {},
+                    totalPoints: 0,
+                    pointsHistory: [],
+                    loginStreak: 0,
+                    lastLoginDate: null,
+                    unlockedTrophies: [],
+                    weeklyMissionProgress: 0,
+                    monthlyMissionProgress: 0,
+                    lastWeeklyResetDate: null,
+                    lastMonthlyResetDate: null,
+                    awardedPointKeys: []
+                });
             },
 
             resetScratchedStatus: () => {
@@ -118,6 +205,82 @@ export const usePassportStore = create<PassportState>()(
             resetOnboarding: () => {
                 set({ hasCompletedOnboarding: false, unlockedRegions: [] });
             },
+
+            addPoints: (amount: number, reason: string) => {
+                const { totalPoints, pointsHistory } = get();
+                const newTransaction: PointTransaction = {
+                    id: Math.random().toString(36).substring(7),
+                    amount,
+                    reason,
+                    timestamp: new Date().toISOString()
+                };
+                set({ 
+                    totalPoints: totalPoints + amount,
+                    pointsHistory: [newTransaction, ...pointsHistory]
+                });
+            },
+
+            processDailyLogin: () => {
+                const { lastLoginDate, loginStreak, addPoints } = get();
+                const today = new Date().toISOString().split('T')[0];
+
+                if (lastLoginDate !== today) {
+                    let newStreak = loginStreak;
+                    
+                    if (lastLoginDate) {
+                        const lastDate = new Date(lastLoginDate);
+                        const currentDate = new Date(today);
+                        const diffTime = Math.abs(currentDate.getTime() - lastDate.getTime());
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+
+                        if (diffDays === 1) {
+                            newStreak += 1;
+                        } else {
+                            newStreak = 1;
+                        }
+                    } else {
+                        newStreak = 1;
+                    }
+
+                    set({ lastLoginDate: today, loginStreak: newStreak });
+                    
+                    addPoints(5, "Login giornaliero");
+
+                    if (newStreak > 0 && newStreak % 7 === 0) {
+                        addPoints(50, "Striscia settimanale 7 giorni");
+                    }
+                }
+            },
+
+            unlockTrophy: (placeId: string) => {
+                const { unlockedTrophies, addPoints, monthlyMissionProgress, lastMonthlyResetDate } = get();
+                if (!unlockedTrophies.includes(placeId)) {
+                    set({ unlockedTrophies: [...unlockedTrophies, placeId] });
+                    addPoints(100, "Trofeo Sbloccato");
+
+                    // Update Monthly Mission
+                    const now = new Date();
+                    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+
+                    let newProgress = monthlyMissionProgress + 1;
+                    if (lastMonthlyResetDate !== startOfMonth) {
+                        newProgress = 1;
+                    }
+
+                    set({ 
+                        monthlyMissionProgress: newProgress,
+                        lastMonthlyResetDate: startOfMonth
+                    });
+
+                    if (newProgress === 2) {
+                        addPoints(150, "Missione mensile");
+                    }
+                }
+            },
+
+            triggerSocialShare: () => {
+                get().addPoints(20, "Condivisione Social");
+            }
         }),
         {
             name: 'passport-storage',

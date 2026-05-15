@@ -9,8 +9,10 @@ import { usePassportStore } from '@/src/store/usePassportStore';
 import ScratchCard from '@/src/components/ScratchCard';
 import FlippableBadge from '@/src/components/FlippableBadge';
 import TrophyViewer from '@/src/components/TrophyViewer';
-import { LucideMapPin, LucideUnlock, LucideCircle, LucideCheckCircle2, LucideSun, LucideMoon, LucideStar } from 'lucide-react-native';
+import { LucideMapPin, LucideUnlock, LucideCircle, LucideCheckCircle2, LucideSun, LucideMoon, LucideStar, LucideShare2, LucideGem, LucideChevronLeft } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
+import PointsBadge from '@/src/components/PointsBadge';
+import { Share } from 'react-native';
 
 export default function PlaceScreen() {
     const { id } = useLocalSearchParams();
@@ -36,6 +38,9 @@ export default function PlaceScreen() {
     const gpsThreshold = usePassportStore((state) => state.gpsThreshold);
     const completedTips = usePassportStore((state) => state.completedTips);
     const toggleTip = usePassportStore((state) => state.toggleTip);
+    const unlockTrophy = usePassportStore((state) => state.unlockTrophy);
+    const triggerSocialShare = usePassportStore((state) => state.triggerSocialShare);
+    const unlockedTrophies = usePassportStore((state) => state.unlockedTrophies);
     
     const { colorScheme, setColorScheme } = useColorScheme();
     const isNight = colorScheme === 'dark';
@@ -54,6 +59,9 @@ export default function PlaceScreen() {
     useEffect(() => {
         if (isTrophyUnlocked && !wasUnlockedOnMount) {
             setShowCelebrationModal(true);
+            if (place) {
+                unlockTrophy(place.id);
+            }
         }
     }, [isTrophyUnlocked, wasUnlockedOnMount]);
 
@@ -68,7 +76,19 @@ export default function PlaceScreen() {
         if (place) {
             markPlaceAsScratched(place.id);
             unlockPlace(place.id); // Ensure it's also marked as visited/unlocked
-            Alert.alert("Complimenti!", `Hai sbloccato il badge: ${place.badge.title}`);
+        }
+    };
+
+    const handleShare = async () => {
+        try {
+            const result = await Share.share({
+                message: `Ehi! Ho appena sbloccato il trofeo di ${place?.name} su Italian Passport! 🇮🇹✨`,
+            });
+            if (result.action === Share.sharedAction) {
+                triggerSocialShare();
+            }
+        } catch (error: any) {
+            Alert.alert(error.message);
         }
     };
 
@@ -95,21 +115,32 @@ export default function PlaceScreen() {
             <Stack.Screen 
                 options={{ 
                     title: place.name,
-                    // @ts-ignore - headerBackTitleVisible is valid in React Navigation but missing in Expo Router types
-                    headerBackTitleVisible: false,
-                    headerBackTitle: '',
+                    headerBackVisible: false, // Hide default back button
+                    headerLeft: () => (
+                        <View className="flex-row items-center ml-1">
+                            <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }} className="mr-3">
+                                <LucideChevronLeft size={32} color={isNight ? '#cbd5e1' : '#334155'} />
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={handleShare} className="bg-blue-100 dark:bg-blue-900/50 p-2 rounded-full border border-blue-200 dark:border-blue-700/50">
+                                <LucideShare2 size={18} color="#3b82f6" />
+                            </TouchableOpacity>
+                        </View>
+                    ),
                     headerRight: () => (
-                        <TouchableOpacity 
-                            onPress={() => toggleFavorite(place.id)}
-                            className="w-10 h-10 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800"
-                            style={{ marginRight: -5 }} // Shift 5 points to the right
-                        >
-                            <LucideStar 
-                                size={22} 
-                                color={isFavorite ? '#fbbf24' : (isNight ? '#cbd5e1' : '#64748b')} 
-                                fill={isFavorite ? '#fbbf24' : 'transparent'} 
-                            />
-                        </TouchableOpacity>
+                        <View className="flex-row items-center gap-4">
+                            <PointsBadge />
+                            <TouchableOpacity 
+                                onPress={() => toggleFavorite(place.id)}
+                                className="w-10 h-10 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800"
+                                style={{ marginRight: -5 }} // Shift 5 points to the right
+                            >
+                                <LucideStar 
+                                    size={22} 
+                                    color={isFavorite ? '#fbbf24' : (isNight ? '#cbd5e1' : '#64748b')} 
+                                    fill={isFavorite ? '#fbbf24' : 'transparent'} 
+                                />
+                            </TouchableOpacity>
+                        </View>
                     )
                 }} 
             />
@@ -125,9 +156,16 @@ export default function PlaceScreen() {
 
                 {/* Interaction Area */}
                 <View
-                    className="h-96 w-full bg-slate-100 dark:bg-slate-800 rounded-2xl mb-8 border border-slate-200 dark:border-slate-700 justify-center items-center overflow-hidden"
+                    className="h-96 w-full bg-slate-100 dark:bg-slate-800 rounded-2xl mb-8 border border-slate-200 dark:border-slate-700 justify-center items-center overflow-hidden relative"
                     style={{ elevation: 2, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 2, shadowOffset: { width: 0, height: 1 } }}
                 >
+                    {/* Points indicator for Badge */}
+                    {scratchedPlaceIds.includes(place.id) && (
+                        <View className="absolute top-4 right-4 bg-green-100 dark:bg-green-900/50 px-3 py-1.5 rounded-full border border-green-200 dark:border-green-700/50 z-10 shadow-sm flex-row items-center">
+                            <LucideGem size={14} color="#16a34a" className="mr-1" />
+                            <Text className="text-green-600 dark:text-green-400 font-bold text-sm">+50 pt</Text>
+                        </View>
+                    )}
                     {/* 
                         CONDITION 1: ALREADY SCRATCHED (Unlocked & Scratched)
                         Show the Big Sticker directly.
@@ -275,6 +313,11 @@ export default function PlaceScreen() {
                                 }`}>
                                     {tip}
                                 </Text>
+                                {isCompleted && (
+                                    <View className="bg-green-100 dark:bg-green-900/40 px-2 py-1 rounded ml-2 border border-green-200 dark:border-green-800">
+                                        <Text className="text-green-600 dark:text-green-400 font-bold text-xs">+10 pt</Text>
+                                    </View>
+                                )}
                             </TouchableOpacity>
                         );
                     })}
@@ -332,8 +375,14 @@ export default function PlaceScreen() {
             {/* Trophy Viewer Modal */}
             <Modal visible={showTrophyModal} animationType="slide" transparent={true}>
                 <View className="flex-1 bg-black/90 justify-center items-center">
-                    <View className="w-[90%] h-[75%] bg-slate-900 rounded-3xl overflow-hidden border border-slate-700 items-center pt-8 shadow-2xl">
-                        <Text className="text-xl font-black text-amber-400 mb-2 tracking-widest uppercase">
+                    <View className="w-[90%] h-[75%] bg-slate-900 rounded-3xl overflow-hidden border border-slate-700 items-center pt-8 shadow-2xl relative">
+                        {unlockedTrophies.includes(place.id) && (
+                            <View className="absolute top-4 right-4 bg-green-500/20 px-3 py-1.5 rounded-full border border-green-500/30 flex-row items-center z-10">
+                                <LucideGem size={14} color="#22c55e" className="mr-1" />
+                                <Text className="text-green-400 font-bold text-sm">+100 pt</Text>
+                            </View>
+                        )}
+                        <Text className="text-xl font-black text-amber-400 mb-2 tracking-widest uppercase mt-2">
                             TROFEO {place.name}
                         </Text>
                         <Text className="text-slate-300 text-center px-6 mb-4 text-sm">
@@ -349,12 +398,21 @@ export default function PlaceScreen() {
                             </Text>
                         </View>
 
-                        <TouchableOpacity 
-                            onPress={() => setShowTrophyModal(false)}
-                            className="bg-slate-800 px-10 py-5 w-full border-t border-slate-700 items-center"
-                        >
-                            <Text className="text-white font-bold text-lg uppercase tracking-wider">Chiudi</Text>
-                        </TouchableOpacity>
+                        <View className="flex-row w-full border-t border-slate-700">
+                            <TouchableOpacity 
+                                onPress={() => setShowTrophyModal(false)}
+                                className="bg-slate-800 px-6 py-5 flex-1 items-center justify-center border-r border-slate-700"
+                            >
+                                <Text className="text-white font-bold text-base uppercase tracking-wider">Chiudi</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity 
+                                onPress={handleShare}
+                                className="bg-blue-600 px-6 py-5 flex-1 items-center justify-center flex-row"
+                            >
+                                <LucideShare2 size={20} color="white" className="mr-2" />
+                                <Text className="text-white font-bold text-base uppercase tracking-wider">Condividi</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
             </Modal>
