@@ -238,7 +238,7 @@ export const PLACES_NORTH: Place[] = [
             "Cena degustando i piatti tipici",
             "Godersi l'atmosfera notturna locale"
         ],
-        badge: { title: "Sabaudo", imageName: "crown.fill", description: "Eleganza reale!" }
+        badge: { title: "Sabaudo", imageName: "crown.fill", description: "Eleganza reale!", imageAsset: require('../../assets/images/badges/torino.png') }
     },
     {
         id: "alba", regionId: "piemonte", name: "Alba", type: "city", province: "CN", latitude: 44.6987, longitude: 8.0353,
@@ -251,7 +251,7 @@ export const PLACES_NORTH: Place[] = [
             "Cena degustando i piatti tipici",
             "Godersi l'atmosfera notturna locale"
         ],
-        badge: { title: "Re del Tartufo", imageName: "leaf.fill", description: "Un profumo inconfondibile!" }
+        badge: { title: "Re del Tartufo", imageName: "leaf.fill", description: "Un profumo inconfondibile!", imageAsset: require('../../assets/images/badges/alba.png') }
     },
     {
         id: "asti", regionId: "piemonte", name: "Asti", type: "city", province: "AT", latitude: 44.9008, longitude: 8.2069,
@@ -264,7 +264,7 @@ export const PLACES_NORTH: Place[] = [
             "Cena degustando i piatti tipici",
             "Godersi l'atmosfera notturna locale"
         ],
-        badge: { title: "Bollina Docg", imageName: "wineglass.fill", description: "Brindisi astigiano!" }
+        badge: { title: "Bollina Docg", imageName: "wineglass.fill", description: "Brindisi astigiano!", imageAsset: require('../../assets/images/badges/asti.png') }
     },
     {
         id: "stresa", regionId: "piemonte", name: "Stresa", type: "city", province: "VB", latitude: 45.8824, longitude: 8.5393,
@@ -277,7 +277,7 @@ export const PLACES_NORTH: Place[] = [
             "Cena degustando i piatti tipici",
             "Godersi l'atmosfera notturna locale"
         ],
-        badge: { title: "Isolano Borromeo", imageName: "leaf.circle.fill", description: "Paradiso lacustre!" }
+        badge: { title: "Isolano Borromeo", imageName: "leaf.circle.fill", description: "Paradiso lacustre!", imageAsset: require('../../assets/images/badges/stresa.png') }
     },
     {
         id: "novara", regionId: "piemonte", name: "Novara", type: "city", province: "NO", latitude: 45.4469, longitude: 8.6186,
@@ -290,7 +290,7 @@ export const PLACES_NORTH: Place[] = [
             "Cena degustando i piatti tipici",
             "Godersi l'atmosfera notturna locale"
         ],
-        badge: { title: "Cupola Sovrana", imageName: "building.columns.fill", description: "Architetto eccelso!" }
+        badge: { title: "Cupola Sovrana", imageName: "building.columns.fill", description: "Architetto eccelso!", imageAsset: require('../../assets/images/badges/novara.png') }
     },
     {
         id: "barolo", regionId: "piemonte", name: "Barolo", type: "borgo", province: "CN", latitude: 44.6111, longitude: 7.9427,
@@ -303,7 +303,7 @@ export const PLACES_NORTH: Place[] = [
             "Cena degustando i piatti tipici",
             "Godersi l'atmosfera notturna locale"
         ],
-        badge: { title: "Sommelier delle Langhe", imageName: "drop.fill", description: "Il Re dei Vini!" }
+        badge: { title: "Sommelier delle Langhe", imageName: "drop.fill", description: "Il Re dei Vini!", imageAsset: require('../../assets/images/badges/barolo.png') }
     },
     {
         id: "ivrea", regionId: "piemonte", name: "Ivrea", type: "city", province: "TO", latitude: 45.4678, longitude: 7.8753,
@@ -316,7 +316,7 @@ export const PLACES_NORTH: Place[] = [
             "Cena degustando i piatti tipici",
             "Godersi l'atmosfera notturna locale"
         ],
-        badge: { title: "Aranciere", imageName: "circle.circle.fill", description: "Battaglia agrumata!" }
+        badge: { title: "Aranciere", imageName: "circle.circle.fill", description: "Battaglia agrumata!", imageAsset: require('../../assets/images/badges/ivrea.png') }
     },
     {
         id: "susa", regionId: "piemonte", name: "Susa", type: "city", province: "TO", latitude: 45.1387, longitude: 7.0543,
@@ -329,7 +329,7 @@ export const PLACES_NORTH: Place[] = [
             "Cena degustando i piatti tipici",
             "Godersi l'atmosfera notturna locale"
         ],
-        badge: { title: "Sentinella delle Alpi", imageName: "shield.fill", description: "Valico di storia!" }
+        badge: { title: "Sentinella delle Alpi", imageName: "shield.fill", description: "Valico di storia!", imageAsset: require('../../assets/images/badges/susa.png') }
     },
 
     // VENETO (10)

@@ -145,7 +145,7 @@ export const PLACES_CENTER: Place[] = [
             "Cena degustando i piatti tipici",
             "Godersi l'atmosfera notturna locale"
         ],
-        badge: { title: "Fiorentino DOC", imageName: "fleur.de.lis.fill", description: "Culla del Rinascimento!" }
+        badge: { title: "Fiorentino DOC", imageName: "fleur.de.lis.fill", description: "Culla del Rinascimento!", imageAsset: require('../../assets/images/badges/firenze.png') }
     },
     {
         id: "siena", regionId: "toscana", name: "Siena", type: "city", province: "SI", latitude: 43.3188, longitude: 11.3308,
@@ -158,7 +158,7 @@ export const PLACES_CENTER: Place[] = [
             "Cena degustando i piatti tipici",
             "Godersi l'atmosfera notturna locale"
         ],
-        badge: { title: "Contradaiolo", imageName: "flag.fill", description: "Il Palio nelle vene!" }
+        badge: { title: "Contradaiolo", imageName: "flag.fill", description: "Il Palio nelle vene!", imageAsset: require('../../assets/images/badges/siena.png') }
     },
     {
         id: "pisa", regionId: "toscana", name: "Pisa", type: "city", province: "PI", latitude: 43.7228, longitude: 10.4017,
@@ -171,7 +171,7 @@ export const PLACES_CENTER: Place[] = [
             "Cena degustando i piatti tipici",
             "Godersi l'atmosfera notturna locale"
         ],
-        badge: { title: "Miracoloso", imageName: "arrow.up.right.circle.fill", description: "Equilibro precario!" }
+        badge: { title: "Miracoloso", imageName: "arrow.up.right.circle.fill", description: "Equilibro precario!", imageAsset: require('../../assets/images/badges/pisa.png') }
     },
     {
         id: "lucca", regionId: "toscana", name: "Lucca", type: "city", province: "LU", latitude: 43.8427, longitude: 10.5027,
@@ -184,7 +184,7 @@ export const PLACES_CENTER: Place[] = [
             "Cena degustando i piatti tipici",
             "Godersi l'atmosfera notturna locale"
         ],
-        badge: { title: "Cavaliere delle Mura", imageName: "leaf.fill", description: "Tra querce sospese!" }
+        badge: { title: "Cavaliere delle Mura", imageName: "leaf.fill", description: "Tra querce sospese!", imageAsset: require('../../assets/images/badges/lucca.png') }
     },
     {
         id: "san_gimignano", regionId: "toscana", name: "San Gimignano", type: "borgo", province: "SI", latitude: 43.4677, longitude: 11.0430,
@@ -197,7 +197,7 @@ export const PLACES_CENTER: Place[] = [
             "Cena degustando i piatti tipici",
             "Godersi l'atmosfera notturna locale"
         ],
-        badge: { title: "Manhattan Medievale", imageName: "building.columns.fill", description: "Tra cielo e terra!" }
+        badge: { title: "Manhattan Medievale", imageName: "building.columns.fill", description: "Tra cielo e terra!", imageAsset: require('../../assets/images/badges/san_gimignano.png') }
     },
     {
         id: "volterra", regionId: "toscana", name: "Volterra", type: "borgo", province: "PI", latitude: 43.4023, longitude: 10.8596,
@@ -210,7 +210,7 @@ export const PLACES_CENTER: Place[] = [
             "Cena degustando i piatti tipici",
             "Godersi l'atmosfera notturna locale"
         ],
-        badge: { title: "Mago Etrusco", imageName: "moon.fill", description: "Magia di alabastro!" }
+        badge: { title: "Mago Etrusco", imageName: "moon.fill", description: "Magia di alabastro!", imageAsset: require('../../assets/images/badges/volterra.png') }
     },
     {
         id: "pienza", regionId: "toscana", name: "Pienza", type: "borgo", province: "SI", latitude: 43.0768, longitude: 11.6789,
@@ -223,7 +223,7 @@ export const PLACES_CENTER: Place[] = [
             "Cena degustando i piatti tipici",
             "Godersi l'atmosfera notturna locale"
         ],
-        badge: { title: "Umanista ideale", imageName: "heart.fill", description: "Amore puro per gli occhi!" }
+        badge: { title: "Umanista ideale", imageName: "heart.fill", description: "Amore puro per gli occhi!", imageAsset: require('../../assets/images/badges/pienza.png') }
     },
     {
         id: "montepulciano", regionId: "toscana", name: "Montepulciano", type: "borgo", province: "SI", latitude: 43.0906, longitude: 11.7828,
@@ -236,7 +236,7 @@ export const PLACES_CENTER: Place[] = [
             "Cena degustando i piatti tipici",
             "Godersi l'atmosfera notturna locale"
         ],
-        badge: { title: "Nobile Sommelier", imageName: "drop.fill", description: "Nobile anche d'animo!" }
+        badge: { title: "Nobile Sommelier", imageName: "drop.fill", description: "Nobile anche d'animo!", imageAsset: require('../../assets/images/badges/montepulciano.png') }
     },
     {
         id: "pitigliano", regionId: "toscana", name: "Pitigliano", type: "borgo", province: "GR", latitude: 42.6347, longitude: 11.6697,
@@ -249,7 +249,7 @@ export const PLACES_CENTER: Place[] = [
             "Cena degustando i piatti tipici",
             "Godersi l'atmosfera notturna locale"
         ],
-        badge: { title: "Abitante del Tufo", imageName: "mountain.2.fill", description: "Terra etrusca!" }
+        badge: { title: "Abitante del Tufo", imageName: "mountain.2.fill", description: "Terra etrusca!", imageAsset: require('../../assets/images/badges/pitigliano.png') }
     },
     {
         id: "viareggio", regionId: "toscana", name: "Viareggio", type: "city", province: "LU", latitude: 43.8668, longitude: 10.2430,

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabase } from '@/src/lib/supabase';
 
 export interface PointTransaction {
     id: string;
@@ -19,6 +20,11 @@ interface PassportState {
     favoritePlaceIds: string[];
     hasCompletedOnboarding: boolean;
     unlockedRegions: string[];
+    
+    // Auth & Profile
+    user: { id: string; email: string; firstName: string; lastName: string } | null;
+    isGuest: boolean;
+    appOpenCount: number;
     
     // Gamification
     totalPoints: number;
@@ -43,6 +49,13 @@ interface PassportState {
     completeOnboarding: () => void;
     setUnlockedRegions: (regions: string[]) => void;
 
+    // Auth Actions
+    setUser: (user: any | null) => void;
+    setGuest: (isGuest: boolean) => void;
+    incrementAppOpen: () => void;
+    syncProgressToCloud: () => Promise<void>;
+    loadProgressFromCloud: () => Promise<void>;
+
     resetProgress: () => void;
     resetScratchedStatus: () => void;
     resetOnboarding: () => void;
@@ -52,6 +65,10 @@ interface PassportState {
     processDailyLogin: () => void;
     unlockTrophy: (placeId: string) => void;
     triggerSocialShare: () => void;
+
+    // Hydration
+    hasHydrated: boolean;
+    setHasHydrated: (hydrated: boolean) => void;
 }
 
 export const usePassportStore = create<PassportState>()(
@@ -67,6 +84,10 @@ export const usePassportStore = create<PassportState>()(
             hasCompletedOnboarding: false,
             unlockedRegions: [],
             
+            user: null,
+            isGuest: true,
+            appOpenCount: 0,
+            
             totalPoints: 0,
             pointsHistory: [],
             loginStreak: 0,
@@ -77,6 +98,9 @@ export const usePassportStore = create<PassportState>()(
             lastWeeklyResetDate: null,
             lastMonthlyResetDate: null,
             awardedPointKeys: [],
+
+            hasHydrated: false,
+            setHasHydrated: (hasHydrated) => set({ hasHydrated }),
 
             unlockPlace: (placeId: string) => {
                 const { visitedPlaceIds } = get();
@@ -179,6 +203,67 @@ export const usePassportStore = create<PassportState>()(
                 }
             },
 
+            // Auth Implementations
+            setUser: (user) => set({ user, isGuest: !user }),
+            setGuest: (isGuest) => set({ isGuest }),
+            incrementAppOpen: () => {
+                const { appOpenCount } = get();
+                set({ appOpenCount: appOpenCount + 1 });
+            },
+
+            syncProgressToCloud: async () => {
+                const state = get();
+                if (!state.user) return; // Only sync if logged in
+
+                const dataToSave = {
+                    visitedPlaceIds: state.visitedPlaceIds,
+                    scratchedPlaceIds: state.scratchedPlaceIds,
+                    scratchedPlaceDates: state.scratchedPlaceDates,
+                    gpsThreshold: state.gpsThreshold,
+                    theme: state.theme,
+                    completedTips: state.completedTips,
+                    favoritePlaceIds: state.favoritePlaceIds,
+                    hasCompletedOnboarding: state.hasCompletedOnboarding,
+                    unlockedRegions: state.unlockedRegions,
+                    appOpenCount: state.appOpenCount,
+                    totalPoints: state.totalPoints,
+                    pointsHistory: state.pointsHistory,
+                    loginStreak: state.loginStreak,
+                    lastLoginDate: state.lastLoginDate,
+                    unlockedTrophies: state.unlockedTrophies,
+                    weeklyMissionProgress: state.weeklyMissionProgress,
+                    monthlyMissionProgress: state.monthlyMissionProgress,
+                    lastWeeklyResetDate: state.lastWeeklyResetDate,
+                    lastMonthlyResetDate: state.lastMonthlyResetDate,
+                    awardedPointKeys: state.awardedPointKeys,
+                };
+
+                const { error } = await supabase.from('user_progress').upsert({ 
+                    id: state.user.id, 
+                    state: dataToSave 
+                });
+
+                if (error) {
+                    console.error("Errore sync cloud:", error);
+                } else {
+                    console.log("Sincronizzazione cloud completata per", state.user.email);
+                }
+            },
+
+            loadProgressFromCloud: async () => {
+                const { user } = get();
+                if (!user) return;
+                
+                const { data, error } = await supabase.from('user_progress').select('state').eq('id', user.id).single();
+                
+                if (data && data.state) {
+                    set({ ...data.state });
+                    console.log("Download dal cloud completato per", user.email);
+                } else if (error && error.code !== 'PGRST116') {
+                    console.error("Errore caricamento cloud:", error);
+                }
+            },
+
             resetProgress: () => {
                 set({ 
                     visitedPlaceIds: [], 
@@ -194,7 +279,10 @@ export const usePassportStore = create<PassportState>()(
                     monthlyMissionProgress: 0,
                     lastWeeklyResetDate: null,
                     lastMonthlyResetDate: null,
-                    awardedPointKeys: []
+                    awardedPointKeys: [],
+                    user: null,
+                    isGuest: true,
+                    appOpenCount: 0
                 });
             },
 
@@ -285,6 +373,11 @@ export const usePassportStore = create<PassportState>()(
         {
             name: 'passport-storage',
             storage: createJSONStorage(() => AsyncStorage),
+            onRehydrateStorage: () => (state, error) => {
+                if (!error && state) {
+                    state.setHasHydrated(true);
+                }
+            }
         }
     )
 );

@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, Share, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScrollView } from 'react-native-gesture-handler';
 import ItalyMap from '@/src/components/Map/ItalyMap';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import ThemeToggle from '@/src/components/ThemeToggle';
 import CurrentLocation from '@/src/components/CurrentLocation';
 import { TwinklingBackground, ShootingStarsOverlay } from '@/src/components/StarryBackground';
@@ -20,9 +20,28 @@ export default function MapScreen() {
   const isDark = colorScheme === 'dark';
   const processDailyLogin = usePassportStore(state => state.processDailyLogin);
   const triggerSocialShare = usePassportStore(state => state.triggerSocialShare);
+  const isGuest = usePassportStore(state => state.isGuest);
+  const appOpenCount = usePassportStore(state => state.appOpenCount);
+  const incrementAppOpen = usePassportStore(state => state.incrementAppOpen);
+  const router = useRouter();
 
   useEffect(() => {
     processDailyLogin();
+    incrementAppOpen();
+    
+    // Check if we should remind the guest to login (e.g. every 3 app opens)
+    if (isGuest && (appOpenCount + 1) % 3 === 0) {
+        setTimeout(() => {
+            Alert.alert(
+                "Salva i tuoi progressi! ☁️",
+                "Stai esplorando come ospite. Registrati gratis per salvare i tuoi punti e trofei nel cloud e non perderli mai!",
+                [
+                    { text: "Non ora", style: "cancel" },
+                    { text: "Registrati", style: "default", onPress: () => router.push('/(auth)/register' as any) }
+                ]
+            );
+        }, 1500); // delay so it doesn't pop up instantly
+    }
   }, []);
 
   const handleShare = async () => {

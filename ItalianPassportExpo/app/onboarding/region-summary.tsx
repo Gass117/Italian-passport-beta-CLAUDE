@@ -18,7 +18,7 @@ export default function RegionSummaryScreen() {
 
     const handleStartJourney = () => {
         completeOnboarding();
-        router.replace('/(tabs)');
+        router.replace('/auth-prompt' as any);
     };
 
     const handleSummaryPress = (regionId: string) => {

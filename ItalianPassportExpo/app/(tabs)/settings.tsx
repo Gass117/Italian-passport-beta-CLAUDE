@@ -3,6 +3,8 @@ import { View, Text, TextInput, TouchableOpacity, Alert, Keyboard, TouchableWith
 import { usePassportStore } from '@/src/store/usePassportStore';
 import { useRouter } from 'expo-router';
 import { useColorScheme } from 'nativewind';
+import { supabase } from '@/src/lib/supabase';
+import { LucideUser, LucideLogOut, LucideSettings } from 'lucide-react-native';
 
 export default function SettingsScreen() {
     const router = useRouter();
@@ -11,6 +13,10 @@ export default function SettingsScreen() {
     const setGpsThreshold = usePassportStore((state) => state.setGpsThreshold);
     const resetProgress = usePassportStore((state) => state.resetProgress);
     const resetOnboarding = usePassportStore((state) => state.resetOnboarding);
+    const user = usePassportStore((state) => state.user);
+    const isGuest = usePassportStore((state) => state.isGuest);
+    const setUser = usePassportStore((state) => state.setUser);
+    const setGuest = usePassportStore((state) => state.setGuest);
 
     const [thresholdInput, setThresholdInput] = useState(gpsThreshold.toString());
 
@@ -84,11 +90,30 @@ export default function SettingsScreen() {
         );
     };
 
-    // Helper to go back to map directly
     const goBackToMap = () => {
         // We use navigate('/') to go back to the first tab (Map) reliably.
         // dimiss() fails if we are already at the root of the tab stack.
         router.navigate('/');
+    };
+
+    const handleLogout = async () => {
+        Alert.alert(
+            "Logout",
+            "Vuoi davvero uscire dal tuo account?",
+            [
+                { text: "Annulla", style: "cancel" },
+                {
+                    text: "Esci",
+                    style: "destructive",
+                    onPress: async () => {
+                        await supabase.auth.signOut();
+                        setUser(null);
+                        setGuest(true);
+                        Alert.alert("Disconnesso", "Hai effettuato il logout.");
+                    }
+                }
+            ]
+        );
     };
 
     return (
@@ -100,6 +125,38 @@ export default function SettingsScreen() {
                     <TouchableOpacity onPress={goBackToMap} className="bg-slate-100 dark:bg-slate-800 p-2 rounded-full">
                         <Text className="text-slate-600 dark:text-slate-300 font-medium px-2">Chiudi</Text>
                     </TouchableOpacity>
+                </View>
+
+                {/* USER PROFILE SECTION */}
+                <View className="mb-8">
+                    <Text className="text-lg font-semibold text-slate-700 dark:text-white mb-2">Il mio Profilo</Text>
+                    {isGuest || !user ? (
+                        <View className="bg-slate-100 dark:bg-slate-800 rounded-lg p-5 items-center">
+                            <LucideUser size={40} color="#94a3b8" className="mb-2" />
+                            <Text className="text-slate-500 dark:text-slate-400 text-center mb-4">
+                                Stai esplorando come Ospite. Registrati per non perdere i progressi!
+                            </Text>
+                            <TouchableOpacity 
+                                onPress={() => router.push('/(auth)/login' as any)}
+                                className="bg-blue-600 px-6 py-2 rounded-full shadow-sm"
+                            >
+                                <Text className="text-white font-bold">Accedi o Registrati</Text>
+                            </TouchableOpacity>
+                        </View>
+                    ) : (
+                        <View className="bg-slate-100 dark:bg-slate-800 rounded-lg p-5 flex-row items-center border border-slate-200 dark:border-slate-700">
+                            <View className="bg-blue-100 dark:bg-blue-900/50 p-3 rounded-full mr-4">
+                                <LucideUser size={28} color="#3b82f6" />
+                            </View>
+                            <View className="flex-1">
+                                <Text className="text-lg font-bold text-slate-800 dark:text-white">{user.firstName} {user.lastName}</Text>
+                                <Text className="text-slate-500 dark:text-slate-400 text-sm">{user.email}</Text>
+                            </View>
+                            <TouchableOpacity onPress={handleLogout} className="p-2">
+                                <LucideLogOut size={24} color="#ef4444" />
+                            </TouchableOpacity>
+                        </View>
+                    )}
                 </View>
 
                 <View className="mb-8">
